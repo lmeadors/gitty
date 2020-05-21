@@ -4,7 +4,7 @@ from xml.etree import ElementTree
 
 
 def setup(context):
-    current_branch_output = subprocess.check_output('git rev-parse -abbrev-ref HEAD'.split())
+    current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
     context['current_branch'] = current_branch_output.decode().strip()
     context['branch_parts'] = context['current_branch'].split("/")
     if len(context['branch_parts']) > 1:
