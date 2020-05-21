@@ -1,6 +1,8 @@
 import subprocess
 import sys
 from xml.etree import ElementTree
+from os import path
+import json
 
 
 def setup(context):
@@ -43,8 +45,8 @@ def release_from_master(context):
     # print('branch from', context['new_master_branch'], 'to', context['new_release_branch'])
     execute_command(('git checkout -b ' + context['new_release_branch']).split())
     # print('set pom.xml on', context['new_release_branch'], 'to', context['release_version'], "(non snapshot)")
-    bump_pom_version_to(context, context['release_version'])
-    execute_command('git add pom.xml'.split())
+    bump_version_to(context, context['release_version'])
+    execute_command('git add {}'.format(context['project_file']).split())
     # this has spaces in a parameter, so it's different...
     execute_command([
         'git',
@@ -57,20 +59,20 @@ def release_from_master(context):
     execute_command('git checkout {}'.format(context['new_master_branch']).split())
     # this is a transient branch/merge, so we won't actually merge, we'll just mark it as merged
     execute_command('git merge --strategy=ours {}'.format(context['new_release_branch']).split())
-    bump_pom_version_to(context, context['next_version'])
-    # print('set pom.xml on', context['new_master_branch'], 'to', context['next_version'], '(next snapshot version)')
-    execute_command('git add pom.xml'.split())
+    bump_version_to(context, context['next_patch'])
+    # print('set pom.xml on', context['new_master_branch'], 'to', context['next_patch'], '(next snapshot version)')
+    execute_command('git add {}'.format(context['project_file']).split())
     # this has spaces in a parameter, so it's different...
     execute_command([
         'git',
         'commit',
         '-m',
-        '"bumped version to ' + context['next_version'] + '"'
+        '"bumped version to ' + context['next_patch'] + '"'
     ])
     execute_command('git checkout master'.split())
     execute_command('git merge --strategy=ours {}'.format(context['new_master_branch']).split())
-    bump_pom_version_to(context, context['next_minor'])
-    execute_command('git add pom.xml'.split())
+    bump_version_to(context, context['next_minor'])
+    execute_command('git add {}'.format(context['project_file']).split())
     execute_command([
         'git',
         'commit',
@@ -79,9 +81,18 @@ def release_from_master(context):
     ])
 
 
-def execute_command(cmd):
-    print('$', ' '.join(cmd))
-    output = subprocess.check_output(cmd)
+def execute_command(command):
+    print('$', ' '.join(command))
+
+    try:
+        subprocess.check_output(command)
+    except subprocess.CalledProcessError as e:
+        print(str(e.output))
+    # finished = output.split('\n')
+    # for line in finished:
+    #     print(line)
+    # return
+    # output = subprocess.check_output(cmd)
     # print(output, '\n')
 
 
@@ -90,8 +101,8 @@ def release_from_point(context):
     execute_command('git checkout {}'.format(context['new_release_branch']).split())
     execute_command('git merge {}'.format(context['current_branch']).split())
     # print('(bump pom on {} to {} - no snapshot)'.format(context['new_release_branch'], context['release_version']))
-    bump_pom_version_to(context, context['release_version'])
-    execute_command('git add pom.xml'.split())
+    bump_version_to(context, context['release_version'])
+    execute_command('git add {}'.format(context['project_file']).split())
     execute_command([
         'git',
         'commit',
@@ -102,18 +113,19 @@ def release_from_point(context):
     execute_command('git checkout {}'.format(context['current_branch']).split())
     # merge changes, but not really.
     execute_command('git merge {}'.format(context['new_release_branch']).split())
-    # print("(bump pom on {} to {})".format(context['current_branch'], context['next_version']))
-    bump_pom_version_to(context, context['next_version'])
-    execute_command('git add pom.xml'.split())
+    # print("(bump pom on {} to {})".format(context['current_branch'], context['next_patch']))
+    bump_version_to(context, context['next_patch'])
+    execute_command('git add {}'.format(context['project_file']).split())
     execute_command([
         'git',
         'commit',
         '-m',
-        '"bumped version to ' + context['next_version'] + '"'
+        '"bumped version to ' + context['next_patch'] + '"'
     ])
 
 
 def help_cmd(context):
+    get_version_info(context)
     if len(context['branch_parts']) > 1:
         # a release branch
         print('available commands on branch "{}" are:'.format(context['current_branch']))
@@ -124,6 +136,7 @@ def help_cmd(context):
         print('available commands on branch "{}" are:'.format(context['current_branch']))
         print('  release     - create a new release stabilization branch and release candidate')
         print('  task [name] - create a new task branch named "{}[name]"'.format(context['task_prefix']))
+    print(context)
 
 
 def task_from_master(context):
@@ -159,6 +172,38 @@ def release(context):
 
 
 def get_version_info(context):
+    # major.minor.patch
+    if path.exists('pom.xml'):
+        return get_version_info_maven(context)
+    if path.exists('package.json'):
+        return get_version_info_node(context)
+
+
+def get_version_info_node(context):
+    context['project_file'] = 'package.json'
+    with open('package.json') as package_json:
+        data = json.load(package_json)
+        context['current_version'] = data['version']
+        context['release_version'] = data['version']
+        release_version_split = context['release_version'].split(".")
+        context['new_master_branch'] = '.'.join(release_version_split[:-1]) + '/master'
+        context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/release'
+        # increment the patch
+        context['next_patch'] = '.'.join([
+            release_version_split[0],
+            release_version_split[1],
+            str(int(release_version_split[2])+1),
+        ])
+        next_min = str(int(release_version_split[1]) + 1)
+        context['next_minor'] = '.'.join([
+            release_version_split[0],
+            next_min,
+            '0'
+        ])
+
+
+def get_version_info_maven(context):
+    context['project_file'] = 'pom.xml'
     pom_ns = 'http://maven.apache.org/POM/4.0.0'
     ns = {'pom': pom_ns}
     ElementTree.register_namespace('', pom_ns)
@@ -182,7 +227,7 @@ def get_version_info(context):
         next_sub = str(int(release_version_split[2]) + 1)
         next_min = str(int(release_version_split[1]) + 1)
         release_version_split[2] = next_sub
-        context['next_version'] = '.'.join(release_version_split) + '-SNAPSHOT'
+        context['next_patch'] = '.'.join(release_version_split) + '-SNAPSHOT'
         context['next_minor'] = '.'.join([
             release_version_split[0],
             next_min,
@@ -192,7 +237,16 @@ def get_version_info(context):
         print('should this ever happen?')
 
 
-def bump_pom_version_to(context, new_version):
+def bump_node_version_to(context, new_version):
+    print('bump version to {}'.format(new_version))
+    with open('package.json') as package_json:
+        data = json.load(package_json)
+        data['version'] = new_version
+    with open('package.json', 'w') as outfile:
+        json.dump(data, outfile, indent=4)
+
+
+def bump_maven_version_to(context, new_version):
     print('bumping pom to', new_version)
 
     # make a backup
@@ -213,6 +267,13 @@ def bump_pom_version_to(context, new_version):
     pom_doc.write("pom.xml")
 
     # edit the pom to make it a non-snapshot version
+
+
+def bump_version_to(context, new_version):
+    if path.exists('pom.xml'):
+        return bump_maven_version_to(context, new_version)
+    if path.exists('package.json'):
+        return bump_node_version_to(context, new_version)
 
 
 # this is to make the xml in the pom retain comments...
