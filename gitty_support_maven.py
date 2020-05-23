@@ -46,10 +46,12 @@ def get_version_info_maven(context):
             # we're already on a stabilization branch, so this includes the full version
             context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
             context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
+            context['new_stabilization_version'] = '.'.join(release_version_split) + '.0-SNAPSHOT'
         else:
             # we're on master, so we want to only include major.minor
             context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/master'
             context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
+            context['new_stabilization_version'] = '.'.join(release_version_split) + '.0-SNAPSHOT'
 
         context['current_release_branch'] = '/'.join([
             context['branch_parts'][0],

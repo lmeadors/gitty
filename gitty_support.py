@@ -32,6 +32,8 @@ def help_cmd(context):
         print('  stabilize')
         print('     - create a new stabilization branch named "{}"'
               .format(context['new_stabilization_branch']))
+        print('     - bump version to "{}" on branch "{}"'
+              .format(context['new_stabilization_version'], context['new_stabilization_branch']))
         print('     - create a new release branch named "{}"'
               .format(context['new_release_branch']))
         print('     - bump version to "{}" on branch "{}"'
@@ -143,15 +145,15 @@ def stabilize_from_master(context):
 
 def stabilize_from_point(context):
     execute_command(context, 'git checkout -b {}'.format(context['new_stabilization_branch']).split())
+    bump_version_to(context, context['new_stabilization_version'])
+    execute_command(context, 'git add {}'.format(context['project_file']).split())
+    execute_command(context, [
+        'git',
+        'commit',
+        '-m',
+        '"bumped version to {}"'.format(context['new_stabilization_version'])
+    ])
     execute_command(context, 'git checkout -b {}'.format(context['new_release_branch']).split())
-    # bump_version_to(context, context['current_version'])
-    # execute_command(context, 'git add {}'.format(context['project_file']).split())
-    # execute_command(context, [
-    #     'git',
-    #     'commit',
-    #     '-m',
-    #     '"bumped version to {}"'.format(context['current_version'])
-    # ])
     execute_command(context, 'git checkout {}'.format(context['current_branch']).split())
     # execute_command(context, 'git merge --strategy ours {}'.format(context['new_stabilization_branch']).split())
     bump_version_to(context, context['next_stable_version'])
