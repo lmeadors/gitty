@@ -41,7 +41,7 @@ available commands on branch "master" are:
 {
     'current_branch': 'master', 'branch_parts': ['master'], 'task_prefix': 'tasks/', 'command': 'help', 
     'project_file': 'package.json', 'current_version': '1.0.0', 'release_version': '1.0.0', 
-    'new_master_branch': '1.0/master', 'new_release_branch': '1.0/release', 'next_patch': '1.0.1', 
+    'new_stabilization_branch': '1.0/master', 'new_release_branch': '1.0/release', 'next_patch': '1.0.1', 
     'next_minor': '1.1.0'
 }
 ```
