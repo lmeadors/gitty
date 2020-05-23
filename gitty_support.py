@@ -7,6 +7,65 @@ import subprocess
 import sys
 
 
+def help_cmd(context):
+    get_version_info(context)
+    print('current version is "{}"'.format(context['current_version']))
+    print('current branch is "{}"'.format(context['current_branch']))
+
+    if len(context['branch_parts']) > 1:
+        # a release branch
+        print('available commands on branch "{}" are:'.format(context['current_branch']))
+        print('  release')
+        print('     - merge "{}" to "{}"'.format(context['current_branch'], context['current_release_branch']))
+        print('     - bump version to "{}" on branch "{}"'
+              .format(context['release_version'], context['current_release_branch']))
+        print('     - create a new tagged release named "{}" on branch "{}"'
+              .format(context['release_version'], context['current_release_branch']))
+        print('     - merge branch "{}" to "{}"'
+              .format(context['current_release_branch'], context['current_branch']))
+        print('     - bump version to "{}" on branch "{}"'
+              .format(context['next_stable_version'], context['current_branch']))
+
+        print('  task [name] - create a new task branch named "{}[name]"'
+              .format(context['task_prefix']))
+
+        print('  stabilize')
+        print('     - create a new stabilization branch named "{}"'
+              .format(context['new_stabilization_branch']))
+        print('     - create a new release branch named "{}"'
+              .format(context['new_release_branch']))
+        print('     - bump version to "{}" on branch "{}"'
+              .format(context['next_stable_version'], context['current_branch']))
+
+    else:
+        # master
+        print('available commands on branch "{}" are:'.format(context['current_branch']))
+        print('  release')
+        print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
+        print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
+        print('     - bump version to "{}" on branch "{}"'
+              .format(context['release_version'], context['new_release_branch']))
+        print('     - create a new tagged release named "{}" on branch "{}"'
+              .format(context['release_version'], context['new_release_branch']))
+        print('     - merge branch "{}" to "{}"'
+              .format(context['new_release_branch'], context['new_stabilization_branch']))
+        print('     - bump version to "{}" on branch "{}"'
+              .format(context['next_stable_version'], context['new_stabilization_branch']))
+        print('     - merge branch "{}" to "{}"'
+              .format(context['new_stabilization_branch'], context['current_branch']))
+        print('     - bump version to "{}" on branch "{}"'
+              .format(context['next_master_version'], context['current_branch']))
+        print('  task [name]')
+        print('     - create a new task branch named "{}[name]"'.format(context['task_prefix']))
+        print('  stabilize')
+        print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
+        print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
+        print('     - bump version to "{}" on branch "{}"'
+              .format(context['next_master_version'], context['current_branch']))
+
+    show(context)
+
+
 def setup(context):
     current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
     context['current_branch'] = current_branch_output.decode().strip()
@@ -67,41 +126,41 @@ def stabilize(context):
 
 def stabilize_from_master(context):
     execute_command(context, 'git checkout -b {}'.format(context['new_stabilization_branch']).split())
+    execute_command(context, 'git checkout -b {}'.format(context['new_release_branch']).split())
     execute_command(context, 'git checkout master'.split())
-    execute_command(context, 'git merge --strategy ours {}'.format(context['new_stabilization_branch']).split())
-    # print('(bump project version to {})'.format(context['next_minor']))
-    bump_version_to(context, context['next_minor'])
+    # execute_command(context, 'git merge --strategy ours {}'.format(context['new_stabilization_branch']).split())
+    # print('(bump project version to {})'.format(context['next_master_version']))
+    bump_version_to(context, context['next_master_version'])
     execute_command(context, 'git add {}'.format(context['project_file']).split())
     execute_command(context, [
         'git',
         'commit',
         '-m',
-        '"bumped version to {}"'.format(context['next_minor'])
+        '"bumped version to {}"'.format(context['next_master_version'])
     ])
     return
 
 
 def stabilize_from_point(context):
-    new_branch = context['new_child_version'] + "/master"
-    new_version = context['new_child_version'] + '.0-SNAPSHOT'
-    execute_command(context, 'git checkout -b {}'.format(new_branch).split())
-    bump_version_to(context, new_version)
-    execute_command(context, 'git add {}'.format(context['project_file']).split())
-    execute_command(context, [
-        'git',
-        'commit',
-        '-m',
-        '"bumped version to {}"'.format(new_version)
-    ])
+    execute_command(context, 'git checkout -b {}'.format(context['new_stabilization_branch']).split())
+    execute_command(context, 'git checkout -b {}'.format(context['new_release_branch']).split())
+    # bump_version_to(context, context['current_version'])
+    # execute_command(context, 'git add {}'.format(context['project_file']).split())
+    # execute_command(context, [
+    #     'git',
+    #     'commit',
+    #     '-m',
+    #     '"bumped version to {}"'.format(context['current_version'])
+    # ])
     execute_command(context, 'git checkout {}'.format(context['current_branch']).split())
-    execute_command(context, 'git merge --strategy ours {}'.format(new_branch).split())
-    bump_version_to(context, context['next_version'])
+    # execute_command(context, 'git merge --strategy ours {}'.format(context['new_stabilization_branch']).split())
+    bump_version_to(context, context['next_stable_version'])
     execute_command(context, 'git add {}'.format(context['project_file']).split())
     execute_command(context, [
         'git',
         'commit',
         '-m',
-        '"bumped version to {}"'.format(context['next_version'])
+        '"bumped version to {}"'.format(context['next_stable_version'])
     ])
     return
 
@@ -132,25 +191,24 @@ def release_from_master(context):
     execute_command(context, 'git checkout {}'.format(context['new_stabilization_branch']).split())
     # this is a transient branch/merge, so we won't actually merge, we'll just mark it as merged
     execute_command(context, 'git merge --strategy=ours {}'.format(context['new_release_branch']).split())
-    bump_version_to(context, context['next_patch'])
-    # print('set pom.xml on', context['new_stabilization_branch'], 'to', context['next_patch'], '(next snapshot version)')
+    bump_version_to(context, context['next_stable_version'])
     execute_command(context, 'git add {}'.format(context['project_file']).split())
     # this has spaces in a parameter, so it's different...
     execute_command(context, [
         'git',
         'commit',
         '-m',
-        '"bumped version to ' + context['next_patch'] + '"'
+        '"bumped version to ' + context['next_stable_version'] + '"'
     ])
     execute_command(context, 'git checkout master'.split())
     execute_command(context, 'git merge --strategy=ours {}'.format(context['new_stabilization_branch']).split())
-    bump_version_to(context, context['next_minor'])
+    bump_version_to(context, context['next_master_version'])
     execute_command(context, 'git add {}'.format(context['project_file']).split())
     execute_command(context, [
         'git',
         'commit',
         '-m',
-        '"bumped version to ' + context['next_minor'] + '"'
+        '"bumped version to ' + context['next_master_version'] + '"'
     ])
 
 
@@ -172,9 +230,8 @@ def execute_command(context, command):
 
 def release_from_point(context):
     get_version_info(context)
-    execute_command(context, 'git checkout {}'.format(context['new_release_branch']).split())
+    execute_command(context, 'git checkout {}'.format(context['current_release_branch']).split())
     execute_command(context, 'git merge {}'.format(context['current_branch']).split())
-    # print('(bump pom on {} to {} - no snapshot)'.format(context['new_release_branch'], context['release_version']))
     bump_version_to(context, context['release_version'])
     execute_command(context, 'git add {}'.format(context['project_file']).split())
     execute_command(context, [
@@ -186,35 +243,15 @@ def release_from_point(context):
     execute_command(context, 'git tag {}'.format(context['release_version']).split())
     execute_command(context, 'git checkout {}'.format(context['current_branch']).split())
     # merge changes, but not really.
-    execute_command(context, 'git merge {}'.format(context['new_release_branch']).split())
-    # print("(bump pom on {} to {})".format(context['current_branch'], context['next_patch']))
-    bump_version_to(context, context['next_patch'])
+    execute_command(context, 'git merge {}'.format(context['current_release_branch']).split())
+    bump_version_to(context, context['next_stable_version'])
     execute_command(context, 'git add {}'.format(context['project_file']).split())
     execute_command(context, [
         'git',
         'commit',
         '-m',
-        '"bumped version to ' + context['next_patch'] + '"'
+        '"bumped version to ' + context['next_stable_version'] + '"'
     ])
-
-
-def help_cmd(context):
-    get_version_info(context)
-    if len(context['branch_parts']) > 1:
-        # a release branch
-        print('available commands on branch "{}" are:'.format(context['current_branch']))
-        print('  release     - create a new tagged release')
-        print('  task [name] - create a new task branch named "{}[name]"'.format(context['task_prefix']))
-        print('  stabilize   - create a new child stabilization branch named {}/master'.format(
-            context['new_child_version']))
-    else:
-        # master
-        print('available commands on branch "{}" are:'.format(context['current_branch']))
-        print('  release     - create a new release stabilization branch and release candidate')
-        print('  task [name] - create a new task branch named "{}[name]"'.format(context['task_prefix']))
-        print('  stabilize   - create a new child stabilization branch named {}'.format(context['new_stabilization_branch']))
-
-    show(context)
 
 
 def show(context):

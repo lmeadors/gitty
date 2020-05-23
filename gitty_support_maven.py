@@ -2,7 +2,7 @@ from xml.etree import ElementTree
 
 
 def bump_maven_version_to(context, new_version):
-    print('bumping pom to', new_version)
+    print('setting pom version to "{}"'.format(new_version))
 
     if not context['dry_run']:
         # make a backup
@@ -39,30 +39,40 @@ def get_version_info_maven(context):
     if context['current_version'].endswith('-SNAPSHOT'):
 
         context['release_version'] = context['current_version'][: -9]
-        # i think these are the same, but i'm not positive...
-        context['new_child_version'] = context['release_version']
 
         # build the next version
         release_version_split = context['release_version'].split(".")
-        context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/master'
-        context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/release'
+        if len(context['branch_parts']) > 1:
+            # we're already on a stabilization branch, so this includes the full version
+            context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
+            context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
+        else:
+            # we're on master, so we want to only include major.minor
+            context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/master'
+            context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
+
+        context['current_release_branch'] = '/'.join([
+            context['branch_parts'][0],
+            'releases'
+        ])
+
         next_sub = str(int(release_version_split[2]) + 1)
         next_min = str(int(release_version_split[1]) + 1)
 
         patch_version = release_version_split.copy()
         patch_version[2] = next_sub
-        context['next_patch'] = '.'.join(patch_version) + '-SNAPSHOT'
+        context['next_stable_version'] = '.'.join(patch_version) + '-SNAPSHOT'
 
-        context['next_minor'] = '.'.join([
+        context['next_master_version'] = '.'.join([
             release_version_split[0],
             next_min,
             '0'
         ]) + '-SNAPSHOT'
 
         # we want to increment the last number, regardless of how many there are...
-        next_version = release_version_split.copy()
-        next_version[-1] = str(int(next_version[-1]) + 1)
-        context['next_version'] = '.'.join(next_version) + '-SNAPSHOT'
+        next_stable_version = release_version_split.copy()
+        next_stable_version[-1] = str(int(next_stable_version[-1]) + 1)
+        context['next_stable_version'] = '.'.join(next_stable_version) + '-SNAPSHOT'
 
     else:
         print('should this ever happen?')
