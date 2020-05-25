@@ -38,6 +38,8 @@ def get_version_info_maven(context):
     context['current_version'] = current_version_tag.text
     if context['current_version'].endswith('-SNAPSHOT'):
 
+        context['hotfix'] = False
+
         context['release_version'] = context['current_version'][: -9]
 
         # build the next version
@@ -77,7 +79,43 @@ def get_version_info_maven(context):
         context['next_stable_version'] = '.'.join(next_stable_version) + '-SNAPSHOT'
 
     else:
-        print('should this ever happen?')
+        # this can happen when making a hotfix!
+
+        context['hotfix'] = True
+
+        # we want to make a stabilization ecosystem from this commit...
+        context['release_version'] = context['current_version']
+
+        # build the next version
+        release_version_split = context['release_version'].split(".")
+
+        # we're on an actual release branch, so this includes the full version
+        context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
+        context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
+        context['new_stabilization_version'] = '.'.join(release_version_split) + '.0-SNAPSHOT'
+
+        context['current_release_branch'] = '/'.join([
+            context['branch_parts'][0],
+            'releases'
+        ])
+
+        next_sub = str(int(release_version_split[2]) + 1)
+        next_min = str(int(release_version_split[1]) + 1)
+
+        patch_version = release_version_split.copy()
+        patch_version[2] = next_sub
+        context['next_stable_version'] = '.'.join(patch_version) + '-SNAPSHOT'
+
+        context['next_master_version'] = '.'.join([
+            release_version_split[0],
+            next_min,
+            '0'
+        ]) + '-SNAPSHOT'
+
+        # we want to increment the last number, regardless of how many there are...
+        next_stable_version = release_version_split.copy()
+        next_stable_version[-1] = str(int(next_stable_version[-1]) + 1)
+        context['next_stable_version'] = '.'.join(next_stable_version) + '-SNAPSHOT'
 
 
 # this is to make the xml in the pom retain comments...
