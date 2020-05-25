@@ -22,6 +22,21 @@ def bump_maven_version_to(context, new_version):
         version_tag.text = new_version
         pom_doc.write("pom.xml")
 
+        # read the pom back in...
+        f = open("pom.xml", "r")
+        contents = f.readlines()
+        f.close()
+
+        # insert xml declaration
+        contents.insert(0, '<?xml version="1.0" encoding="UTF-8"?>\n')
+        # append a blank line
+        contents.append('\n')
+
+        f = open("pom.xml", "w")
+        contents = "".join(contents)
+        f.write(contents)
+        f.close()
+
 
 def get_version_info_maven(context):
     context['project_file'] = 'pom.xml'
