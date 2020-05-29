@@ -1,3 +1,6 @@
 .idea/
 __pycache__
 .backup*
+build/
+dist/
+gitty_lmeadors.egg-info/
