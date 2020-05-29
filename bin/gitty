@@ -1,4 +1,5 @@
-from gitty_support import *
+from gitty import *
+
 import sys
 
 context = setup({})

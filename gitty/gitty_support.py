@@ -1,11 +1,11 @@
-from gitty_support_maven import *
-from gitty_support_node import *
-from gitty_support_pip import *
-from gitty_support_unknown import *
-
 from os import path
 import subprocess
 import sys
+
+from gitty.gitty_support_maven import *
+from gitty.gitty_support_node import *
+from gitty.gitty_support_pip import *
+from gitty.gitty_support_unknown import *
 
 
 def help_cmd(context):
