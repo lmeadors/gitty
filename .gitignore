@@ -3,4 +3,4 @@ __pycache__
 .backup*
 build/
 dist/
-gitty_lmeadors.egg-info/
+*.egg-info/
