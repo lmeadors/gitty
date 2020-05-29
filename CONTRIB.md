@@ -10,3 +10,16 @@ From the project root, you can do this to install a development snapshot from yo
     pip3 install -e .
    
 This is a "live" version - as you make changes to the project, running it will be reflected immediately.
+
+### building a distribution
+
+    rm -rf dist
+    python3 setup.py sdist bdist_wheel
+
+### deploying to pypi (test)
+
+    python3 -m twine upload --repository testpypi dist/*
+
+### deploying to pypi (production)
+
+    python3 -m twine upload dist/*
