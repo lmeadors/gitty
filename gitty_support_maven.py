@@ -51,6 +51,10 @@ def get_version_info_maven(context):
 
     current_version_tag = pom.find('pom:version', ns)
     context['current_version'] = current_version_tag.text
+
+    # todo: we could use `git tag --points-at HEAD` to see if this commit is tagged - that might be a better way to
+    #  know if we want a hotfix or not - for now, this will do...
+
     if context['current_version'].endswith('-SNAPSHOT'):
 
         context['hotfix'] = False
