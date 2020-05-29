@@ -18,13 +18,13 @@ def help_cmd(context):
         print('available commands on branch "{}" are:'.format(context['current_branch']))
         print('  release')
         print('     - merge "{}" to "{}"'.format(context['current_branch'], context['current_release_branch']))
-        print('     - bump version to "{}" on branch "{}"'
+        print('     - set version to "{}" on branch "{}"'
               .format(context['release_version'], context['current_release_branch']))
         print('     - create a new tagged release named "{}" on branch "{}"'
               .format(context['release_version'], context['current_release_branch']))
         print('     - merge branch "{}" to "{}"'
               .format(context['current_release_branch'], context['current_branch']))
-        print('     - bump version to "{}" on branch "{}"'
+        print('     - set version to "{}" on branch "{}"'
               .format(context['next_stable_version'], context['current_branch']))
 
         print('  task [name] - create a new task branch named "{}[name]"'
@@ -39,11 +39,11 @@ def help_cmd(context):
               .format(context['new_release_branch']))
         print('     - create a new stabilization branch named "{}"'
               .format(context['new_stabilization_branch']))
-        print('     - bump version to "{}" on branch "{}"'
+        print('     - set version to "{}" on branch "{}"'
               .format(context['new_stabilization_version'], context['new_stabilization_branch']))
 
         if not context['hotfix']:
-            print('     - bump version to "{}" on branch "{}"'
+            print('     - set version to "{}" on branch "{}"'
                   .format(context['next_stable_version'], context['current_branch']))
 
     else:
@@ -52,24 +52,24 @@ def help_cmd(context):
         print('  release')
         print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
         print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
-        print('     - bump version to "{}" on branch "{}"'
+        print('     - set version to "{}" on branch "{}"'
               .format(context['release_version'], context['new_release_branch']))
         print('     - create a new tagged release named "{}" on branch "{}"'
               .format(context['release_version'], context['new_release_branch']))
         print('     - merge branch "{}" to "{}"'
               .format(context['new_release_branch'], context['new_stabilization_branch']))
-        print('     - bump version to "{}" on branch "{}"'
+        print('     - set version to "{}" on branch "{}"'
               .format(context['next_stable_version'], context['new_stabilization_branch']))
         print('     - merge branch "{}" to "{}"'
               .format(context['new_stabilization_branch'], context['current_branch']))
-        print('     - bump version to "{}" on branch "{}"'
+        print('     - set version to "{}" on branch "{}"'
               .format(context['next_master_version'], context['current_branch']))
         print('  task [name]')
         print('     - create a new task branch named "{}[name]"'.format(context['task_prefix']))
         print('  stabilize')
         print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
         print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
-        print('     - bump version to "{}" on branch "{}"'
+        print('     - set version to "{}" on branch "{}"'
               .format(context['next_master_version'], context['current_branch']))
 
     show(context)

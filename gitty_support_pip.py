@@ -1,6 +1,4 @@
-import json
 from distutils.core import run_setup
-from distutils.core import Distribution
 
 
 def bump_pip_version_to(context, new_version):
@@ -9,14 +7,36 @@ def bump_pip_version_to(context, new_version):
 
 
 def get_version_info_pip(context):
-    # this reads a setup.py file
-    setup = run_setup('./setup.py', stop_after='config')
-    print(setup.metadata.version)
-    context['hotfix'] = None
-    context['project_file'] = 'unknown'
-    context['current_version'] = 'unknown'
-    context['release_version'] = 'unknown'
-    context['new_stabilization_branch'] = 'unknown/master'
-    context['new_release_branch'] = 'unknown/releases'
-    context['next_master_version'] = 'unknown'
-    context['next_stable_version'] = 'unknown'
+    context['project_file'] = 'setup.py'
+    setup = run_setup(context['project_file'], stop_after='config')
+    current_version = setup.metadata.version
+
+    # print(setup.metadata.__dict__)
+    context['hotfix'] = False
+    context['current_version'] = current_version
+    context['release_version'] = current_version
+
+    current_version_split = current_version.split(".")
+    stable_branch_version = '.'.join(
+        current_version_split[:-1]
+    )
+    context['new_stabilization_branch'] = stable_branch_version + '/master'
+    context['new_release_branch'] = stable_branch_version + '/releases'
+
+    next_master_version = '.'.join([
+        current_version_split[0],
+        str(int(current_version_split[1]) + 1),
+        current_version_split[2]
+    ])
+    context['next_master_version'] = next_master_version
+
+    next_stable_version = '.'.join([
+        current_version_split[0],
+        current_version_split[1],
+        str(int(current_version_split[2]) + 1)
+    ])
+    context['next_stable_version'] = next_stable_version
+
+    context['current_release_branch'] = 'n/a'
+
+    context['new_stabilization_version'] = 'unknown'
