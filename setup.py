@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="gitty-lmeadors",
-    version="1.0.2",
+    name="gitty",
+    version="1.0.3",
     author="Larry Meadors",
     author_email="larry.meadors@elm-software.com",
     description="An alternate git workflow tool",
