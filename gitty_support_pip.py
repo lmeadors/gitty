@@ -2,16 +2,35 @@ from distutils.core import run_setup
 
 
 def bump_pip_version_to(context, new_version):
-    # no-op to show what this function should do - a template for other project types
+
+    # we need to read in the setup.py file and replace the
+    print('set version to {} in {}'.format(new_version, context['project_file']))
+
+    if not context['dry_run']:
+
+        with open(context['project_file'], 'r') as setup_file:
+            lines = setup_file.readlines()
+
+        new_lines = []
+        for line in lines:
+            if line.strip().startswith('version='):
+                new_lines.append('    version="{}",'.format(new_version))
+            else:
+                new_lines.append(line.rstrip())
+
+        with open(context['project_file'], 'w') as setup_file:
+            for line in new_lines:
+                setup_file.write(line + "\n")
+
     return
 
 
 def get_version_info_pip(context):
     context['project_file'] = 'setup.py'
     setup = run_setup(context['project_file'], stop_after='config')
-    current_version = setup.metadata.version
-
     # print(setup.metadata.__dict__)
+
+    current_version = setup.metadata.version
     context['hotfix'] = False
     context['current_version'] = current_version
     context['release_version'] = current_version
