@@ -23,3 +23,13 @@ This is a "live" version - as you make changes to the project, running it will b
 ### deploying to pypi (production)
 
     python3 -m twine upload dist/*
+
+## uninstall and install from pypi
+
+    pip3 uninstall gitty-lmeadors
+    pip3 install gitty-lmeadors --no-cache-dir
+
+To install a specific version:
+
+    pip3 install gitty-lmeadors==1.0.3 --no-cache-dir
+
