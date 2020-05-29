@@ -2,7 +2,6 @@ from distutils.core import run_setup
 
 
 def bump_pip_version_to(context, new_version):
-
     # we need to read in the setup.py file and replace the
     print('set version to {} in {}'.format(new_version, context['project_file']))
 
@@ -56,6 +55,9 @@ def get_version_info_pip(context):
     ])
     context['next_stable_version'] = next_stable_version
 
-    context['current_release_branch'] = 'n/a'
+    if len(context['branch_parts']) > 1:
+        context['current_release_branch'] = stable_branch_version + '/releases'
+    else:
+        context['current_release_branch'] = 'n/a'
 
     context['new_stabilization_version'] = 'unknown'
