@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gitty",
-    version="1.0.5",
+    version="1.0.6",
     author="Larry Meadors",
     author_email="larry.meadors@elm-software.com",
     description="An alternate git workflow tool",
