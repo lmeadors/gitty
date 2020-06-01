@@ -18,6 +18,7 @@ This is a "live" version - as you make changes to the project, running it will b
 If you want to build a release, you'll start on a master branch (i.e., `1.0/master`), then use gitty to snap a release:
 
     gitty r
+    git push --all && git push --tags
     
 Next, you want to build the deployment artifact from the matching release branch:
     
