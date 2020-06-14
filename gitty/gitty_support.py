@@ -349,10 +349,11 @@ def get_version_info(context):
             context['master'] = False
     context['on_a_task'] = context['current_branch'].startswith(context['task_prefix'])
     context['on_a_master'] = (context['branch_parts'][-1] == 'master')
+    context['on_a_release'] = (context['branch_parts'][-1] == 'releases')
 
     context['current_version_parts'] = context['current_version'].split('.')
 
-    if context['on_a_task']:
+    if context['on_a_task'] or context['on_a_release']:
         # we're working a task - the parent is different...
         context['parent_version_branch'] = context['branch_parts'][0] + '/master'
     else:
