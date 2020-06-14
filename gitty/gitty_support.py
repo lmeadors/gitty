@@ -75,7 +75,7 @@ def help_cmd(context):
 
         if not context['master']:
             print('  parent')
-            print('     - checkout parent version branch {}'.format(context['parent_version_branch']))
+            print('     - checkout parent version branch "{}"'.format(context['parent_version_branch']))
 
         print('  version')
         print('     - show current gitty version ({})'.format(context['gitty_version']))
