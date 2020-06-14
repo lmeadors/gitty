@@ -1,4 +1,5 @@
 from os import path
+import pkg_resources  # part of setuptools
 import subprocess
 import sys
 
@@ -13,76 +14,98 @@ def help_cmd(context):
     print('current version is "{}"'.format(context['current_version']))
     print('current branch is "{}"'.format(context['current_branch']))
 
-    if len(context['branch_parts']) > 1:
-        # a release branch
-        print('available commands on branch "{}" are:'.format(context['current_branch']))
-        print('  release')
-        print('     - merge "{}" to "{}"'.format(context['current_branch'], context['current_release_branch']))
-        print('     - set version to "{}" on branch "{}"'
-              .format(context['release_version'], context['current_release_branch']))
-        print('     - create a new tagged release named "{}" on branch "{}"'
-              .format(context['release_version'], context['current_release_branch']))
-        print('     - merge branch "{}" to "{}"'
-              .format(context['current_release_branch'], context['current_branch']))
-        print('     - set version to "{}" on branch "{}"'
-              .format(context['next_stable_version'], context['current_branch']))
+    if context['branch_parts'] is not None:
+        if len(context['branch_parts']) > 1:
+            # a release branch
+            print('available commands on branch "{}" are:'.format(context['current_branch']))
+            if not context['on_a_task']:
+                print('  release')
+                print('     - merge "{}" to "{}"'.format(context['current_branch'], context['current_release_branch']))
+                print('     - set version to "{}" on branch "{}"'
+                      .format(context['release_version'], context['current_release_branch']))
+                print('     - create a new tagged release named "{}" on branch "{}"'
+                      .format(context['release_version'], context['current_release_branch']))
+                print('     - merge branch "{}" to "{}"'
+                      .format(context['current_release_branch'], context['current_branch']))
+                print('     - set version to "{}" on branch "{}"'
+                      .format(context['next_stable_version'], context['current_branch']))
 
-        print('  task [name] - create a new task branch named "{}[name]"'
-              .format(context['task_prefix']))
+                print('  task [name] - create a new task branch named "{}[name]"'
+                      .format(context['task_prefix']))
 
-        if context['hotfix']:
-            print('  stabilize (hotfix)')
+                if context['hotfix']:
+                    print('  stabilize (hotfix)')
+                else:
+                    print('  stabilize')
+
+                print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
+                print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
+                print('     - set version to "{}" on branch "{}"'.format(context['new_stabilization_version'], context['new_stabilization_branch']))
+
+                if not context['hotfix']:
+                    print('     - set version to "{}" on branch "{}"'.format(
+                        context['next_stable_version'], context['current_branch'])
+                    )
+
         else:
-            print('  stabilize')
-
-        print('     - create a new release branch named "{}"'
-              .format(context['new_release_branch']))
-        print('     - create a new stabilization branch named "{}"'
-              .format(context['new_stabilization_branch']))
-        print('     - set version to "{}" on branch "{}"'
-              .format(context['new_stabilization_version'], context['new_stabilization_branch']))
-
-        if not context['hotfix']:
+            # master
+            print('available commands on branch "{}" are:'.format(context['current_branch']))
+            print('  release')
+            print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
+            print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
             print('     - set version to "{}" on branch "{}"'
-                  .format(context['next_stable_version'], context['current_branch']))
+                  .format(context['release_version'], context['new_release_branch']))
+            print('     - create a new tagged release named "{}" on branch "{}"'
+                  .format(context['release_version'], context['new_release_branch']))
+            print('     - merge branch "{}" to "{}"'
+                  .format(context['new_release_branch'], context['new_stabilization_branch']))
+            print('     - set version to "{}" on branch "{}"'
+                  .format(context['next_stable_version'], context['new_stabilization_branch']))
+            print('     - merge branch "{}" to "{}"'
+                  .format(context['new_stabilization_branch'], context['current_branch']))
+            print('     - set version to "{}" on branch "{}"'
+                  .format(context['next_master_version'], context['current_branch']))
+            print('  task [name]')
+            print('     - create a new task branch named "{}[name]"'.format(context['task_prefix']))
+            print('  stabilize')
+            print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
+            print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
+            print('     - set version to "{}" on branch "{}"'
+                  .format(context['next_master_version'], context['current_branch']))
 
-    else:
-        # master
-        print('available commands on branch "{}" are:'.format(context['current_branch']))
-        print('  release')
-        print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
-        print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
-        print('     - set version to "{}" on branch "{}"'
-              .format(context['release_version'], context['new_release_branch']))
-        print('     - create a new tagged release named "{}" on branch "{}"'
-              .format(context['release_version'], context['new_release_branch']))
-        print('     - merge branch "{}" to "{}"'
-              .format(context['new_release_branch'], context['new_stabilization_branch']))
-        print('     - set version to "{}" on branch "{}"'
-              .format(context['next_stable_version'], context['new_stabilization_branch']))
-        print('     - merge branch "{}" to "{}"'
-              .format(context['new_stabilization_branch'], context['current_branch']))
-        print('     - set version to "{}" on branch "{}"'
-              .format(context['next_master_version'], context['current_branch']))
-        print('  task [name]')
-        print('     - create a new task branch named "{}[name]"'.format(context['task_prefix']))
-        print('  stabilize')
-        print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
-        print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
-        print('     - set version to "{}" on branch "{}"'
-              .format(context['next_master_version'], context['current_branch']))
+        if not context['master']:
+            print('  parent')
+            print('     - checkout parent version branch "{}"'.format(context['parent_version_branch']))
 
-    show(context)
+        print('  version')
+        print('     - show current gitty version ({})'.format(context['gitty_version']))
+
+    # show(context)
 
 
 def setup(context):
-    current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
-    context['current_branch'] = current_branch_output.decode().strip()
-    context['branch_parts'] = context['current_branch'].split("/")
-    if len(context['branch_parts']) > 1:
-        context['task_prefix'] = context['branch_parts'][0] + '/tasks/'
-    else:
-        context['task_prefix'] = 'tasks/'
+
+    # we'll actually do stuff, unless this is over-written
+    context['dry_run'] = False
+
+    # add the current gitty version to the context
+    context['gitty_version'] = pkg_resources.require("gitty")[0].version
+
+    try:
+        current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
+        context['current_branch'] = current_branch_output.decode().strip()
+        context['branch_parts'] = context['current_branch'].split("/")
+        if len(context['branch_parts']) > 1:
+            context['task_prefix'] = context['branch_parts'][0] + '/tasks/'
+        else:
+            context['task_prefix'] = 'tasks/'
+
+    except subprocess.CalledProcessError:
+        print('current directory is not a git repository')
+        context['current_branch'] = None
+        context['branch_parts'] = None
+        context['task_prefix'] = None
+        context['dry_run'] = True
 
     if path.exists('package.json'):
         context['project_type'] = 'nodejs'
@@ -94,9 +117,6 @@ def setup(context):
         context['project_type'] = 'unknown'
 
     get_version_info(context)
-
-    # we'll actually do stuff, unless this is over-written
-    context['dry_run'] = False
 
     return context
 
@@ -118,10 +138,22 @@ def command_handler(context):
         's': stabilize,
         'stabilize': stabilize,
         'stabilize_from_master': stabilize_from_master,
-        'stabilize_from_point': stabilize_from_point
+        'stabilize_from_point': stabilize_from_point,
+        'v': version,
+        'version': version,
+        'p': parent,
+        'parent': parent
     }
     print("command:", context['command'])
     switcher.get(context['command'])(context)
+
+
+def parent(context):
+    execute_command(context, 'git checkout {}'.format(context['parent_version_branch']).split())
+
+
+def version(context):
+    print('current gitty version: {}'.format(context['gitty_version']))
 
 
 def stabilize(context):
@@ -266,7 +298,9 @@ def release_from_point(context):
 
 
 def show(context):
+    print('-- current context --')
     print(json.dumps(context, indent=2))
+    print('---------------------')
 
 
 def task_from_master(context):
@@ -308,7 +342,28 @@ def get_version_info(context):
         'pip': get_version_info_pip,
         'unknown': get_version_info_unknown
     }
-    return switcher.get(context['project_type'])(context)
+    switcher.get(context['project_type'])(context)
+    context['master'] = True
+    if context['branch_parts'] is not None:
+        if len(context['branch_parts']) > 1:
+            context['master'] = False
+    context['on_a_task'] = context['current_branch'].startswith(context['task_prefix'])
+    context['on_a_master'] = (context['branch_parts'][-1] == 'master')
+
+    context['current_version_parts'] = context['current_version'].split('.')
+
+    if context['on_a_task']:
+        # we're working a task - the parent is different...
+        context['parent_version_branch'] = context['branch_parts'][0] + '/master'
+    else:
+        if len(context['current_version_parts']) < 4:
+            # parent is just master
+            context['parent_version_branch'] = 'master'
+        else:
+            # parent is a shortened version
+            context['parent_version_branch'] = '.'.join(context['current_version_parts'][:-2]) + '/master'
+
+    return context
 
 
 def bump_version_to(context, new_version):
