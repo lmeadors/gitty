@@ -142,10 +142,27 @@ def command_handler(context):
         'v': version,
         'version': version,
         'p': parent,
-        'parent': parent
+        'parent': parent,
+        'c': cleanup,
+        'clean': cleanup
     }
     print("command:", context['command'])
     switcher.get(context['command'])(context)
+
+
+def cleanup(context):
+    # git branch --no-color --merged
+    execute_command(context, 'git fetch --all --prune'.split())
+    command_output = execute_command(context, 'git branch --no-color --merged'.split())
+    output_decoded = command_output.decode('utf-8')
+    output_lines = output_decoded.splitlines()
+    for line in output_lines:
+        branch_name = line.split()[-1]
+        if not branch_name.endswith('/master') and not branch_name.endswith('/releases') and branch_name != 'master':
+            execute_command(context, 'git branch -d {}'.format(branch_name).split())
+        else:
+            print('leaving branch "{}"'.format(branch_name))
+    return
 
 
 def parent(context):
@@ -260,7 +277,7 @@ def execute_command(context, command):
 
     if not context['dry_run']:
         try:
-            subprocess.check_output(command)
+            return subprocess.check_output(command)
         except subprocess.CalledProcessError as e:
             print(str(e.output))
         # finished = output.split('\n')
