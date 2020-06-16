@@ -77,6 +77,9 @@ def help_cmd(context):
             print('  parent')
             print('     - checkout parent version branch "{}"'.format(context['parent_version_branch']))
 
+        print('  cleanup')
+        print('     - remove any local branches that have been merged to "{}"'.format(context['current_branch']))
+        print('     - remove any refs to remote branches that have been removed')
         print('  version')
         print('     - show current gitty version ({})'.format(context['gitty_version']))
 
