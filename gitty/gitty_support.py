@@ -154,6 +154,7 @@ def command_handler(context):
 
 
 def cleanup(context):
+    show(context)
     # git branch --no-color --merged
     execute_command(context, 'git fetch --all --prune'.split())
     command_output = execute_command(context, 'git branch --no-color --merged'.split())
@@ -161,10 +162,19 @@ def cleanup(context):
     output_lines = output_decoded.splitlines()
     for line in output_lines:
         branch_name = line.split()[-1]
-        if not branch_name.endswith('/master') and not branch_name.endswith('/releases') and branch_name != 'master':
+
+        retain_reason = ''
+        if branch_name.endswith('/master') or branch_name == 'master':
+            retain_reason = 'master branches are preserved'
+        if branch_name.endswith('/releases'):
+            retain_reason = 'release branches are preserved'
+        if branch_name == context['current_branch']:
+            retain_reason = 'current branch is preserved'
+
+        if not retain_reason:
             execute_command(context, 'git branch -d {}'.format(branch_name).split())
         else:
-            print('leaving branch "{}"'.format(branch_name))
+            print('leaving branch "{}" ({})'.format(branch_name, retain_reason))
     return
 
 
