@@ -154,7 +154,7 @@ def command_handler(context):
 
 
 def cleanup(context):
-    show(context)
+    # show(context)
     # git branch --no-color --merged
     execute_command(context, 'git fetch --all --prune'.split())
     command_output = execute_command(context, 'git branch --no-color --merged'.split())
