@@ -147,7 +147,8 @@ def command_handler(context):
         'p': parent,
         'parent': parent,
         'c': cleanup,
-        'clean': cleanup
+        'clean': cleanup,
+        'cleanup': cleanup
     }
     print("command:", context['command'])
     switcher.get(context['command'])(context)
@@ -156,7 +157,14 @@ def command_handler(context):
 def cleanup(context):
     # show(context)
     # git branch --no-color --merged
+    response = execute_command(context, 'git status -s'.split())
+    if response:
+        # this repo isn't "clean", so don't continue...
+        print(response.decode())
+        print('aborting cleanup process - repository has outstanding changes')
+        return
     execute_command(context, 'git fetch --all --prune'.split())
+    execute_command(context, 'git pull --rebase'.split())
     command_output = execute_command(context, 'git branch --no-color --merged'.split())
     output_decoded = command_output.decode('utf-8')
     output_lines = output_decoded.splitlines()
