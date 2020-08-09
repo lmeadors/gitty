@@ -147,24 +147,42 @@ def command_handler(context):
         'p': parent,
         'parent': parent,
         'c': cleanup,
-        'clean': cleanup
+        'clean': cleanup,
+        'cleanup': cleanup
     }
     print("command:", context['command'])
     switcher.get(context['command'])(context)
 
 
 def cleanup(context):
+    # show(context)
     # git branch --no-color --merged
+    response = execute_command(context, 'git status -s'.split())
+    if response:
+        # this repo isn't "clean", so don't continue...
+        print(response.decode())
+        print('aborting cleanup process - repository has outstanding changes')
+        return
     execute_command(context, 'git fetch --all --prune'.split())
+    execute_command(context, 'git pull --rebase'.split())
     command_output = execute_command(context, 'git branch --no-color --merged'.split())
     output_decoded = command_output.decode('utf-8')
     output_lines = output_decoded.splitlines()
     for line in output_lines:
         branch_name = line.split()[-1]
-        if not branch_name.endswith('/master') and not branch_name.endswith('/releases') and branch_name != 'master':
+
+        retain_reason = ''
+        if branch_name.endswith('/master') or branch_name == 'master':
+            retain_reason = 'master branches are preserved'
+        if branch_name.endswith('/releases'):
+            retain_reason = 'release branches are preserved'
+        if branch_name == context['current_branch']:
+            retain_reason = 'current branch is preserved'
+
+        if not retain_reason:
             execute_command(context, 'git branch -d {}'.format(branch_name).split())
         else:
-            print('leaving branch "{}"'.format(branch_name))
+            print('leaving branch "{}" ({})'.format(branch_name, retain_reason))
     return
 
 

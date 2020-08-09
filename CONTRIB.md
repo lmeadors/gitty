@@ -13,6 +13,9 @@ a development snapshot from your sources:
    
 This is a "live" version - as you make changes to the project, running it will be reflected immediately.
 
+> NOTE: If you update your python after installing a local version, then remove the old version, things may break - to
+> fix the problem, run `pip3 install -e .` again.
+
 ### building a distribution
 
 If you want to build a release, you'll start on a master branch (i.e., `1.0/master`), then use gitty to snap a release:
