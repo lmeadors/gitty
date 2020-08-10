@@ -1,3 +1,4 @@
+import os
 from os import path
 import pkg_resources  # part of setuptools
 import subprocess
@@ -7,6 +8,7 @@ from gitty.gitty_support_maven import *
 from gitty.gitty_support_node import *
 from gitty.gitty_support_pip import *
 from gitty.gitty_support_unknown import *
+from gitty.gitty_command import *
 
 
 def help_cmd(context):
@@ -40,7 +42,8 @@ def help_cmd(context):
 
                 print('     - create a new release branch named "{}"'.format(context['new_release_branch']))
                 print('     - create a new stabilization branch named "{}"'.format(context['new_stabilization_branch']))
-                print('     - set version to "{}" on branch "{}"'.format(context['new_stabilization_version'], context['new_stabilization_branch']))
+                print('     - set version to "{}" on branch "{}"'.format(context['new_stabilization_version'],
+                                                                         context['new_stabilization_branch']))
 
                 if not context['hotfix']:
                     print('     - set version to "{}" on branch "{}"'.format(
@@ -80,8 +83,12 @@ def help_cmd(context):
         print('  cleanup')
         print('     - remove any local branches that have been merged to "{}"'.format(context['current_branch']))
         print('     - remove any refs to remote branches that have been removed')
-        print('  version')
-        print('     - show current gitty version ({})'.format(context['gitty_version']))
+        # print('  version')
+        # print('     - show current gitty version ({})'.format(context['gitty_version']))
+        commands = context["commands"]
+        for command in commands:
+            if command.is_available(context):
+                command.display_help(context)
 
     # show(context)
 
@@ -89,7 +96,15 @@ def help_cmd(context):
 def setup(context):
 
     # we'll actually do stuff, unless this is over-written
-    context['dry_run'] = False
+    if os.getenv('GITTY_DRY_RUN', False):
+        context['dry_run'] = True
+        print('*** DRY RUN - NOT ACTUALLY MAKING ANY CHANGES ***')
+    else:
+        context['dry_run'] = False
+
+    context["handled"] = False
+
+    command_setup(context)
 
     # add the current gitty version to the context
     context['gitty_version'] = pkg_resources.require("gitty")[0].version
@@ -98,7 +113,7 @@ def setup(context):
         current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
         context['current_branch'] = current_branch_output.decode().strip()
         context['branch_parts'] = context['current_branch'].split("/")
-        if len(context['branch_parts']) > 1:
+        if len(context['branch_parts']) > 1 and context['branch_parts'][0] != 'tasks':
             context['task_prefix'] = context['branch_parts'][0] + '/tasks/'
         else:
             context['task_prefix'] = 'tasks/'
@@ -108,6 +123,7 @@ def setup(context):
         context['current_branch'] = None
         context['branch_parts'] = None
         context['task_prefix'] = None
+        # be extra sure we don't change anything here...
         context['dry_run'] = True
 
     if path.exists('package.json'):
@@ -142,16 +158,34 @@ def command_handler(context):
         'stabilize': stabilize,
         'stabilize_from_master': stabilize_from_master,
         'stabilize_from_point': stabilize_from_point,
-        'v': version,
-        'version': version,
+        # 'v': version,
+        # 'version': version,
         'p': parent,
         'parent': parent,
         'c': cleanup,
         'clean': cleanup,
         'cleanup': cleanup
     }
-    print("command:", context['command'])
-    switcher.get(context['command'])(context)
+    command_name = context['command']
+    print("command name: ", command_name)
+    handled = False
+
+    # look for a command object for this command...
+    for value in context["commands"]:
+        if value.is_called(context):
+            value.do_it(context)
+            context["handled"] = True
+
+    if not context["handled"]:
+        # command not handled yet -
+        command_handler_function = switcher.get(command_name)
+        if command_handler_function:
+            command_handler_function(context)
+            context["handled"] = True
+        else:
+            print("command '{}' not found".format(command_name))
+            help_cmd(context)
+            context["handled"] = True
 
 
 def cleanup(context):
