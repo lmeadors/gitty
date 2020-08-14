@@ -80,9 +80,9 @@ def help_cmd(context):
             print('  parent')
             print('     - checkout parent version branch "{}"'.format(context['parent_version_branch']))
 
-        print('  cleanup')
-        print('     - remove any local branches that have been merged to "{}"'.format(context['current_branch']))
-        print('     - remove any refs to remote branches that have been removed')
+        # print('  cleanup')
+        # print('     - remove any local branches that have been merged to "{}"'.format(context['current_branch']))
+        # print('     - remove any refs to remote branches that have been removed')
         # print('  version')
         # print('     - show current gitty version ({})'.format(context['gitty_version']))
         commands = context["commands"]
@@ -161,10 +161,7 @@ def command_handler(context):
         # 'v': version,
         # 'version': version,
         'p': parent,
-        'parent': parent,
-        'c': cleanup,
-        'clean': cleanup,
-        'cleanup': cleanup
+        'parent': parent
     }
     command_name = context['command']
     print("command name: ", command_name)
@@ -186,38 +183,6 @@ def command_handler(context):
             print("command '{}' not found".format(command_name))
             help_cmd(context)
             context["handled"] = True
-
-
-def cleanup(context):
-    # show(context)
-    # git branch --no-color --merged
-    response = execute_command(context, 'git status -s'.split())
-    if response:
-        # this repo isn't "clean", so don't continue...
-        print(response.decode())
-        print('aborting cleanup process - repository has outstanding changes')
-        return
-    execute_command(context, 'git fetch --all --prune'.split())
-    execute_command(context, 'git pull --rebase'.split())
-    command_output = execute_command(context, 'git branch --no-color --merged'.split())
-    output_decoded = command_output.decode('utf-8')
-    output_lines = output_decoded.splitlines()
-    for line in output_lines:
-        branch_name = line.split()[-1]
-
-        retain_reason = ''
-        if branch_name.endswith('/master') or branch_name == 'master':
-            retain_reason = 'master branches are preserved'
-        if branch_name.endswith('/releases'):
-            retain_reason = 'release branches are preserved'
-        if branch_name == context['current_branch']:
-            retain_reason = 'current branch is preserved'
-
-        if not retain_reason:
-            execute_command(context, 'git branch -d {}'.format(branch_name).split())
-        else:
-            print('leaving branch "{}" ({})'.format(branch_name, retain_reason))
-    return
 
 
 def parent(context):
@@ -419,22 +384,31 @@ def get_version_info(context):
     if context['branch_parts'] is not None:
         if len(context['branch_parts']) > 1:
             context['master'] = False
+
+    if context['branch_parts'][0] == 'tasks' or context['branch_parts'][0] == 'master':
+        context['stabilization'] = False
+    else:
+        context['stabilization'] = True
+
     context['on_a_task'] = context['current_branch'].startswith(context['task_prefix'])
     context['on_a_master'] = (context['branch_parts'][-1] == 'master')
     context['on_a_release'] = (context['branch_parts'][-1] == 'releases')
 
     context['current_version_parts'] = context['current_version'].split('.')
 
-    if context['on_a_task'] or context['on_a_release']:
-        # we're working a task - the parent is different...
-        context['parent_version_branch'] = context['branch_parts'][0] + '/master'
-    else:
-        if len(context['current_version_parts']) < 4:
-            # parent is just master
-            context['parent_version_branch'] = 'master'
+    if context['stabilization']:
+        if context['on_a_task'] or context['on_a_release']:
+            # we're working a task - the parent is different...
+            context['parent_version_branch'] = context['branch_parts'][0] + '/master'
         else:
-            # parent is a shortened version
-            context['parent_version_branch'] = '.'.join(context['current_version_parts'][:-2]) + '/master'
+            if len(context['current_version_parts']) < 4:
+                # parent is just master
+                context['parent_version_branch'] = 'master'
+            else:
+                # parent is a shortened version
+                context['parent_version_branch'] = '.'.join(context['current_version_parts'][:-2]) + '/master'
+    else:
+        context['parent_version_branch'] = 'master'
 
     return context
 
