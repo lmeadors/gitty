@@ -30,6 +30,12 @@ class GittyUnknownProjectType(GittyProjectType):
     def is_in_use(self, context):
         return True
 
+    def get_version_info(self, context):
+        print('unable to get version info for unknown project type')
+
+    def bump_version_to(self, context, new_version):
+        print('unable to set version for unknown project type')
+
 
 class GittyMaven(GittyProjectType):
 

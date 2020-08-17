@@ -2,7 +2,26 @@ from gitty.gitty_command import *
 
 
 def setup(context):
+
+    # get any CLI switches in the context - experimental...
+    argc = len(sys.argv)
+    for i in range(argc):
+        param = sys.argv[i]
+        if param.startswith('--'):
+            param = param[2:]
+            if i + 1 < argc:
+                next_value = sys.argv[i + 1]
+                if next_value.startswith('--'):
+                    value = True
+                else:
+                    value = next_value
+            else:
+                value = True
+            # print('{} = {}'.format(param, value))
+            context[param] = value
+
     command_setup(context)
+
     return context
 
 

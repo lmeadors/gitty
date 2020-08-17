@@ -9,13 +9,6 @@ from .gitty_project_type import *
 
 def command_setup(context):
 
-    # we'll actually do stuff, unless this is over-written
-    if os.getenv('GITTY_DRY_RUN', False):
-        context['dry_run'] = True
-        print('*** DRY RUN - NOT ACTUALLY MAKING ANY CHANGES ***')
-    else:
-        context['dry_run'] = False
-
     # register the available commands
     context["commands"] = [
         GittyClean(),
