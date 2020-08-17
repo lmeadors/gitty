@@ -1,4 +1,6 @@
 import json
+import os
+import pkg_resources  # part of setuptools
 import subprocess
 import sys
 
@@ -6,6 +8,13 @@ from .gitty_project_type import *
 
 
 def command_setup(context):
+
+    # we'll actually do stuff, unless this is over-written
+    if os.getenv('GITTY_DRY_RUN', False):
+        context['dry_run'] = True
+        print('*** DRY RUN - NOT ACTUALLY MAKING ANY CHANGES ***')
+    else:
+        context['dry_run'] = False
 
     # register the available commands
     context["commands"] = [
@@ -24,6 +33,29 @@ def command_setup(context):
         if project_type.is_in_use(context):
             context['project_type'] = project_type
             break
+
+    try:
+        current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
+        context['current_branch'] = current_branch_output.decode().strip()
+        context['branch_parts'] = context['current_branch'].split("/")
+        if len(context['branch_parts']) > 1 and context['branch_parts'][0] != 'tasks':
+            context['task_prefix'] = context['branch_parts'][0] + '/tasks/'
+        else:
+            context['task_prefix'] = 'tasks/'
+
+    except subprocess.CalledProcessError:
+        print(Color.red_lt('current directory is not a git repository'))
+        context['current_branch'] = None
+        context['branch_parts'] = None
+        context['task_prefix'] = None
+        # be extra sure we don't change anything here...
+        context['dry_run'] = True
+
+    # now that we know what kind of project we have, get the version info from it
+    GittyCommand.get_version_info(context)
+
+    # add the current gitty version to the context
+    context['gitty_version'] = pkg_resources.require("gitty")[0].version
 
 
 class GittyCommand:
