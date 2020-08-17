@@ -28,8 +28,15 @@ def command_setup(context):
         GittyHelp(),
     ]
 
-    # figure out what kind of project we are using
-    for project_type in [GittyMaven(), GittyPip(), GittyUnknownProjectType()]:
+    # figure out what kind of project we are using - we'll check in the order these
+    # are listed and stop as soon as we find a match - the "unknown" type always
+    # matches - so we check it last.
+    for project_type in [
+        GittyMaven(),
+        GittyPip(),
+        GittyNode(),
+        GittyUnknownProjectType()
+    ]:
         if project_type.is_in_use(context):
             context['project_type'] = project_type
             break
