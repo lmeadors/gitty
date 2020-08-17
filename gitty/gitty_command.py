@@ -32,6 +32,7 @@ def command_setup(context):
     ]:
         if project_type.is_in_use(context):
             context['project_type'] = project_type
+            context['project_type_name'] = project_type.get_name()
             break
 
     try:
@@ -271,6 +272,8 @@ class GittyStabilize(GittyCommand):
     _bindings = ['s', 'stabilize']
 
     def is_available(self, context):
+        if context['project_type_name'] == 'unknown':
+            return False
         if context['current_branch'] is None:
             return False
         return not context['on_a_task']
@@ -381,6 +384,8 @@ class GittyRelease(GittyCommand):
     _bindings = ['r', 'release']
 
     def is_available(self, context):
+        if context['project_type_name'] == 'unknown':
+            return False
         if context['current_branch'] is None:
             return False
         return not context['on_a_task']

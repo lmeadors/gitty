@@ -32,6 +32,8 @@ class GittyUnknownProjectType(GittyProjectType):
 
     def get_version_info(self, context):
         print('unable to get version info for unknown project type')
+        context['project_file'] = None
+        context['current_version'] = 'unknown'
 
     def bump_version_to(self, context, new_version):
         print('unable to set version for unknown project type')
