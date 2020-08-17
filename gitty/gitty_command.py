@@ -531,6 +531,26 @@ class Color:
     _reset = '\u001b[0m'
 
     @staticmethod
+    def no_color():
+        Color._black = ''
+        Color._black_lt = ''
+        Color._red = ''
+        Color._red_lt = ''
+        Color._green = ''
+        Color._green_lt = ''
+        Color._yellow = ''
+        Color._yellow_lt = ''
+        Color._blue = ''
+        Color._blue_lt = ''
+        Color._magenta = ''
+        Color._magenta_lt = ''
+        Color._cyan = ''
+        Color._cyan_lt = ''
+        Color._white = ''
+        Color._white_lt = ''
+        Color._reset = ''
+
+    @staticmethod
     def white_lt(text):
         return '{}{}{}'.format(Color._white_lt, text, Color._reset)
 
