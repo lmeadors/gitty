@@ -30,7 +30,7 @@ def setup(context):
             context['task_prefix'] = 'tasks/'
 
     except subprocess.CalledProcessError:
-        print('current directory is not a git repository')
+        print(Color.red_lt('current directory is not a git repository'))
         context['current_branch'] = None
         context['branch_parts'] = None
         context['task_prefix'] = None

@@ -95,6 +95,9 @@ class GittyCommand:
 
         context['project_type'].get_version_info(context)
 
+        if context['current_branch'] is None:
+            return context
+
         context['master'] = True
         if context['branch_parts'] is not None:
             if len(context['branch_parts']) > 1:
@@ -174,7 +177,7 @@ class GittyClean(GittyCommand):
     _bindings = ['c', 'clean']
 
     def is_available(self, context):
-        return True
+        return context['current_branch'] is not None
 
     def do_it(self, context):
         response = self.execute_command(context, 'git status -s'.split())
@@ -219,6 +222,8 @@ class GittyParent(GittyCommand):
     _bindings = ['p', 'parent']
 
     def is_available(self, context):
+        if context['current_branch'] is None:
+            return False
         return not context['master']
 
     def do_it(self, context):
@@ -234,6 +239,8 @@ class GittyStabilize(GittyCommand):
     _bindings = ['s', 'stabilize']
 
     def is_available(self, context):
+        if context['current_branch'] is None:
+            return False
         return not context['on_a_task']
 
     def do_it(self, context):
@@ -312,6 +319,8 @@ class GittyTask(GittyCommand):
     _bindings = ['t', 'task']
 
     def is_available(self, context):
+        if context['current_branch'] is None:
+            return False
         return not context['on_a_task']
 
     def do_it(self, context):
@@ -340,6 +349,8 @@ class GittyRelease(GittyCommand):
     _bindings = ['r', 'release']
 
     def is_available(self, context):
+        if context['current_branch'] is None:
+            return False
         return not context['on_a_task']
 
     def get_description(self, context):
