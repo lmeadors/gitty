@@ -2,8 +2,4 @@
 
 from gitty import *
 
-import sys
-
-context = setup({})
-
-exit(command_handler(context))
+exit(command_handler(setup({})))
