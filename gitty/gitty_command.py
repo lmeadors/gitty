@@ -186,6 +186,21 @@ class CommandStep:
         return
 
 
+class CommentStep(CommandStep):
+
+    def __init__(self, comment, context_entry_names):
+        self.comment = comment
+        self.context_entry_names = context_entry_names
+
+    def describe(self, context):
+        param_values = []
+        for name in self.context_entry_names:
+            param_values.append(context[name])
+        return [
+            '# ' + self.comment % tuple(param_values)
+        ]
+
+
 class GitCommandStep(CommandStep):
     def __init__(self, cmd_template, context_entry_names):
         self.cmd_template = cmd_template

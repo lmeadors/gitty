@@ -1,4 +1,4 @@
-from gitty import GittyCommand, GitCommandStep
+from gitty import GittyCommand, GitCommandStep, CommentStep
 
 
 class GittyParent(GittyCommand):
@@ -6,6 +6,7 @@ class GittyParent(GittyCommand):
     _name = 'go to parent branch'
     _bindings = ['p', 'parent']
     _steps = [
+        CommentStep('go to parent branch (%s)', ['parent_version_branch']),
         GitCommandStep('git checkout %s', ['parent_version_branch'])
     ]
 
@@ -17,12 +18,9 @@ class GittyParent(GittyCommand):
     def do_it(self, context):
         for step in self._steps:
             step.execute(context)
-            # self.execute_command(context, 'git checkout {}'.format(context['parent_version_branch']).split())
 
     def get_description(self, context):
-        description = [
-            '# {} ({})'.format(self._name, context['parent_version_branch'])
-        ]
+        description = []
         for step in self._steps:
             description += step.describe(context)
 
