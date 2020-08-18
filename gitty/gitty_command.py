@@ -117,8 +117,10 @@ class GittyCommand:
 
     @staticmethod
     def execute_command(context, command):
+        # show the command to be run
         print('$', ' '.join(command))
 
+        # if we aren't doing a dry run, do the command
         if not context['dry_run']:
             try:
                 return subprocess.check_output(command)
@@ -173,3 +175,35 @@ class GittyCommand:
 
     def bump_version_to(self, context, new_version):
         context['project_type'].bump_version_to(context, new_version)
+
+
+# this class describes the API for a command step - a series of these in a list will be used to define a command
+class CommandStep:
+    def describe(self, context):
+        return []
+
+    def execute(self, context):
+        return
+
+
+class GitCommandStep(CommandStep):
+    def __init__(self, cmd_template, context_entry_names):
+        self.cmd_template = cmd_template
+        self.context_entry_names = context_entry_names
+
+    def describe(self, context):
+        param_values = []
+        for name in self.context_entry_names:
+            # print('adding {} to param-values as {}'.format(name, context[name]))
+            param_values.append(context[name])
+        return [
+            '$ ' + self.cmd_template % tuple(param_values)
+        ]
+
+    def execute(self, context):
+        param_values = []
+        for name in self.context_entry_names:
+            # print('adding {} to param-values as {}'.format(name, context[name]))
+            param_values.append(context[name])
+        command = self.cmd_template % tuple(param_values)
+        GittyCommand.execute_command(context, command.split())
