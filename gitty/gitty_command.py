@@ -29,6 +29,11 @@ def command_setup(context):
         GittyHelp(),
     ]
 
+    # import these here to avoid circular references
+    from .gitty_project_type_maven import GittyMaven
+    from .gitty_project_type_node import GittyNode
+    from .gitty_project_type_pip import GittyPip
+
     # figure out what kind of project we are using - we'll check in the order these
     # are listed and stop as soon as we find a match - the "unknown" type always
     # matches - so we check it last.
@@ -78,6 +83,9 @@ class GittyCommand:
     # these are the aliases for this command
     _bindings = ['b', 'base']
 
+    # these are the steps needed to accomplish this command
+    _steps = []
+
     @staticmethod
     def title_format(title):
         return Color.white_lt(title)
@@ -113,7 +121,8 @@ class GittyCommand:
         return command_name in self._bindings
 
     def do_it(self, context):
-        return
+        for step in self._steps:
+            step.execute(context)
 
     @staticmethod
     def execute_command(context, command):
@@ -222,3 +231,46 @@ class GitCommandStep(CommandStep):
             param_values.append(context[name])
         command = self.cmd_template % tuple(param_values)
         GittyCommand.execute_command(context, command.split())
+
+
+# this one is a bit different - sometimes we need to specify the command as an array instead of just a string
+class GitCommandBump(CommandStep):
+    def __init__(self, version_name):
+        self.version_name = version_name
+        self.command_parts = [
+            'git',
+            'commit',
+            '-m',
+            '"bumped version to {}"'
+        ]
+
+    def describe(self, context):
+        description = []
+        for part in self.command_parts:
+            if '{}' in part:
+                description.append(part.format(context[self.version_name]))
+            else:
+                description.append(part)
+        return ['$ ' + ' '.join(description)]
+
+    def execute(self, context):
+        parts = []
+        for part in self.command_parts:
+            if '{}' in part:
+                parts.append(part.format(context[self.version_name]))
+            else:
+                parts.append(part)
+        GittyCommand.execute_command(context, parts)
+
+
+class BumpVersionStep(CommandStep):
+    def __init__(self, new_version_name):
+        self.new_version_name = new_version_name
+
+    def describe(self, context):
+        return [
+            '# bump version to {}'.format(context[self.new_version_name]),
+        ]
+
+    def execute(self, context):
+        context['project_type'].bump_version_to(context, context[self.new_version_name])

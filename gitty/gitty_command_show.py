@@ -1,17 +1,16 @@
 import json
 
-from gitty import GittyCommand
+from gitty import GittyCommand, CommandStep
 
 
-class GittyShowContext(GittyCommand):
-    _title = 'show'
-    _name = 'show current context (useful for debugging)'
-    _bindings = ['show']
+class ShowStep(CommandStep):
+    def __init__(self, description):
+        self.description = description
 
-    def is_available(self, context):
-        return True
+    def describe(self, context):
+        return [self.description]
 
-    def do_it(self, context):
+    def execute(self, context):
         def without_keys(con):
             return {x: con[x] for x in con if x not in {
                 # some context elements can't be represented as json - exclude them here
@@ -22,3 +21,20 @@ class GittyShowContext(GittyCommand):
         print('-- current context --')
         print(json.dumps(without_keys(context), indent=2))
         print('---------------------')
+
+
+class GittyShowContext(GittyCommand):
+    _title = 'show'
+    _name = 'show current context (useful for debugging)'
+    _bindings = ['show']
+    _steps = [
+        ShowStep(_name)
+    ]
+
+    def is_available(self, context):
+        return True
+
+    def do_it(self, context):
+        for step in self._steps:
+            step.execute(context)
+
