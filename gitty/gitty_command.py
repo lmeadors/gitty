@@ -101,7 +101,8 @@ class GittyCommand:
     @staticmethod
     def execute_steps(steps, context):
         for step in steps:
-            step.execute(context)
+            if context.get('continue', True):
+                step.execute(context)
 
     @staticmethod
     def describe_steps(steps, context):
@@ -137,6 +138,17 @@ class GittyCommand:
             step.execute(context)
 
     @staticmethod
+    def execute_command_safe(context, command):
+        # this is to be used to run a command that is safe from the perspective of a "dry run"
+        # show the command to be run
+        print('$', ' '.join(command))
+
+        try:
+            return subprocess.check_output(command)
+        except subprocess.CalledProcessError as e:
+            print(Color.red_lt(str(e.output)))
+
+    @staticmethod
     def execute_command(context, command):
         # show the command to be run
         print('$', ' '.join(command))
@@ -153,6 +165,8 @@ class GittyCommand:
             # return
             # output = subprocess.check_output(cmd)
             # print(output, '\n')
+        else:
+            return bytes(0)
 
     @staticmethod
     def get_version_info(context):
