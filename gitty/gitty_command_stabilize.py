@@ -54,59 +54,32 @@ class GittyStabilize(GittyCommand):
     ]
 
     def is_available(self, context):
+
+        # we need a known project type
         if context['project_type_name'] == 'unknown':
             return False
+
+        # we need to be in a git repo
         if context['current_branch'] is None:
             return False
+
+        # don't create a stabilization ecosystem from a task
         return not context['on_a_task']
 
     def do_it(self, context):
         if len(context['branch_parts']) > 1:
             if context['hotfix']:
-                steps = self._steps_from_release
+                GittyCommand.execute_steps(self._steps_from_release, context)
             else:
-                steps = self._steps_from_release + self._steps_from_point
+                GittyCommand.execute_steps(self._steps_from_release + self._steps_from_point, context)
         else:
-            steps = self._steps_from_master
-
-        for step in steps:
-            step.execute(context)
+            GittyCommand.execute_steps(self._steps_from_master, context)
 
     def get_description(self, context):
         if len(context['branch_parts']) > 1:
             if context['hotfix']:
-                steps = self._steps_from_release
+                return GittyCommand.describe_steps(self._steps_from_release, context)
             else:
-                steps = self._steps_from_release + self._steps_from_point
+                return GittyCommand.describe_steps(self._steps_from_release + self._steps_from_point, context)
         else:
-            steps = self._steps_from_master
-
-        description = []
-        for step in steps:
-            description += step.describe(context)
-
-        return description
-
-    def stabilize_from_point(self, context):
-        # do these for a hotfix or any other stabilization ecosystem
-        self.execute_command(context, 'git checkout -b {}'.format(context['new_release_branch']).split())
-        self.execute_command(context, 'git checkout -b {}'.format(context['new_stabilization_branch']).split())
-        self.bump_version_to(context, context['new_stabilization_version'])
-        self.execute_command(context, 'git add {}'.format(context['project_file']).split())
-        self.execute_command(context, [
-            'git',
-            'commit',
-            '-m',
-            '"bumped version to {}"'.format(context['new_stabilization_version'])
-        ])
-        if not context['hotfix']:
-            # these are skipped for a hotfix
-            self.execute_command(context, 'git checkout {}'.format(context['current_branch']).split())
-            self.bump_version_to(context, context['next_stable_version'])
-            self.execute_command(context, 'git add {}'.format(context['project_file']).split())
-            self.execute_command(context, [
-                'git',
-                'commit',
-                '-m',
-                '"bumped version to {}"'.format(context['next_stable_version'])
-            ])
+            return GittyCommand.describe_steps(self._steps_from_master, context)

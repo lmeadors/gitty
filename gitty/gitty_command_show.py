@@ -35,6 +35,7 @@ class GittyShowContext(GittyCommand):
         return True
 
     def do_it(self, context):
-        for step in self._steps:
-            step.execute(context)
+        GittyCommand.execute_steps(self._steps, context)
 
+    def get_description(self, context):
+        return GittyCommand.describe_steps(self._steps, context)

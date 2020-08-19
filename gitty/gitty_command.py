@@ -98,6 +98,18 @@ class GittyCommand:
     def description_format(line):
         return Color.blue_lt(line)
 
+    @staticmethod
+    def execute_steps(steps, context):
+        for step in steps:
+            step.execute(context)
+
+    @staticmethod
+    def describe_steps(steps, context):
+        description = []
+        for step in steps:
+            description += step.describe(context)
+        return description
+
     def display_help(self, context):
         # print a blank line...
         print()

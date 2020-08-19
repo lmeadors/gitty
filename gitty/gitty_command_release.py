@@ -52,31 +52,26 @@ class GittyRelease(GittyCommand):
     ]
 
     def is_available(self, context):
+
+        # we need to have a known project type for this to work
         if context['project_type_name'] == 'unknown':
             return False
+
+        # we need to be in a git repository for this to work
         if context['current_branch'] is None:
             return False
+
+        # don't create a release from a task branch
         return not context['on_a_task']
 
     def get_description(self, context):
-
-        if len(context['branch_parts']) > 1:
-            steps = self._steps_from_point
+        if context['master']:
+            return GittyCommand.describe_steps(self._steps_from_master, context)
         else:
-            steps = self._steps_from_master
-
-        description = []
-        for step in steps:
-            description += step.describe(context)
-
-        return description
+            return GittyCommand.describe_steps(self._steps_from_point, context)
 
     def do_it(self, context):
-
-        if len(context['branch_parts']) > 1:
-            steps = self._steps_from_point
+        if context['master']:
+            GittyCommand.execute_steps(self._steps_from_master, context)
         else:
-            steps = self._steps_from_master
-
-        for step in steps:
-            step.execute(context)
+            GittyCommand.execute_steps(self._steps_from_point, context)
