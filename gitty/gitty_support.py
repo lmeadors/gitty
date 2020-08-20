@@ -1,4 +1,5 @@
 from gitty.gitty_command import *
+import sys
 
 
 def setup(context):

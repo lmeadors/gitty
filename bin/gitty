@@ -2,4 +2,5 @@
 
 from gitty import *
 
+# this calls setup, then passes the results of that to the command handler, then exits with its return value
 exit(command_handler(setup({})))
