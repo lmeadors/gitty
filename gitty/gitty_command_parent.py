@@ -13,7 +13,7 @@ class GittyParent(GittyCommand):
     def is_available(self, context):
         if context['current_branch'] is None:
             return False
-        return not context['master']
+        return not context['the_master']
 
     def do_it(self, context):
         for step in self._steps:

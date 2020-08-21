@@ -49,8 +49,16 @@ def command_setup(context):
             break
 
     try:
-        current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
-        GittyCommand.add_branch_info_to_context(context, current_branch_output.decode().strip())
+        # this is a hack for testing...it would be better to get this indirectly instead of calling git, something like
+        # context['get_current_branch'].get() - that way, we could put a component in the context to get it from that
+        # was either a static test component, or one that talked to git. then we could test both parts independently.
+        if context.get('current_branch', None) is None:
+            current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
+            current_branch = current_branch_output.decode().strip()
+        else:
+            current_branch = context['current_branch']
+
+        GittyCommand.add_branch_info_to_context(context, current_branch)
 
     except subprocess.CalledProcessError:
         print(Color.red_lt('current directory is not a git repository'))
@@ -233,25 +241,11 @@ class GittyCommand:
         if context['current_branch'] is None:
             return context
 
-        context['master'] = True
-        if context['branch_parts'] is not None:
-            if len(context['branch_parts']) > 1:
-                context['master'] = False
-
-        if context['branch_parts'][0] == 'tasks' or context['branch_parts'][0] == 'master':
-            context['stabilization'] = False
-        else:
-            context['stabilization'] = True
-
-        context['on_a_task'] = context['current_branch'].startswith(context['task_prefix'])
-        context['on_a_master'] = (context['branch_parts'][-1] == 'master')
-        context['on_a_release'] = (context['branch_parts'][-1] == 'releases')
-
         context['current_version_parts'] = context['current_version'].split('.')
 
-        if context['stabilization']:
-            if context['on_a_task'] or context['on_a_release']:
-                # we're working a task - the parent is different...
+        if context['is_stable']:
+            if context['a_task'] or context['a_release']:
+                # we're on a task or release branch - the parent is different...
                 context['parent_version_branch'] = context['branch_parts'][0] + '/master'
             else:
                 if len(context['current_version_parts']) < 4:
@@ -264,9 +258,6 @@ class GittyCommand:
             context['parent_version_branch'] = 'master'
 
         return context
-
-    def bump_version_to(self, context, new_version):
-        context['project_type'].bump_version_to(context, new_version)
 
 
 # this class describes the API for a command step - a series of these in a list will be used to define a command

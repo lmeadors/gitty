@@ -162,6 +162,50 @@ class TestGittyMaven(TestCase):
         # go back where we started
         os.chdir(cwd)
 
+    def test_get_version_info_from_stable_task(self):
+        # where are we?
+        cwd = os.path.dirname(__file__)
+        # from here, this is where the pom is...
+        os.chdir(cwd + '/maven_sample_snapshot')
+        maven = GittyMaven()
+        expected = {
+            'current_branch': '1.0/tasks/123_snapped_the_frame',
+            'is_stable': True,
+            'branch_parts': ['1.0', 'tasks', '123_snapped_the_frame'],
+            'project_file': 'pom.xml',
+            'current_version': '1.0.0-SNAPSHOT',
+            'hotfix': False,
+            'release_version': '1.0.0',
+            'new_stabilization_branch': None,
+            'new_release_branch': None,
+            'new_stabilization_version': None,
+            'next_stable_version': '1.0.1-SNAPSHOT',
+            'next_master_version': '1.1.0-SNAPSHOT',
+            'the_master': False,
+            'a_master': False,
+            'a_task': True,
+            'a_release': False,
+            'task_prefix': None,
+            'current_release_branch': '1.0/releases'
+        }
+
+        # init the context
+        context = {}
+        # we'll act as if this is on the master branch
+        GittyCommand.add_branch_info_to_context(context, '1.0/tasks/123_snapped_the_frame')
+        # print(context)
+        # add the project branch info
+        maven.get_version_info(context)
+        # print(context)
+
+        for key in context.keys():
+            # print(key)
+            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
+        self.assertEqual(len(expected), len(context))
+
+        # go back where we started
+        os.chdir(cwd)
+
     def test_get_version_info_from_release_for_hotfix(self):
         # where are we?
         cwd = os.path.dirname(__file__)
