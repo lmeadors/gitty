@@ -21,7 +21,7 @@ class TestGittyMaven(TestCase):
         # where are we?
         cwd = os.path.dirname(__file__)
         # from here, this is where the pom is...
-        os.chdir(cwd + '/maven_sample_snapshot')
+        os.chdir(cwd + '/sample_files/maven_snapshot')
         maven = GittyMaven()
         context = {}
         self.assertTrue(maven.is_in_use(context))
@@ -34,12 +34,13 @@ class TestGittyMaven(TestCase):
         # where are we?
         cwd = os.path.dirname(__file__)
         # from here, this is where the pom is...
-        os.chdir(cwd + '/maven_sample_snapshot')
+        os.chdir(cwd + '/sample_files/maven_snapshot')
         maven = GittyMaven()
         expected = {
             'current_branch': 'master',
             'is_stable': False,
             'branch_parts': ['master'],
+            'project_type_name': 'maven',
             'project_file': 'pom.xml',
             'current_version': '1.0.0-SNAPSHOT',
             'hotfix': False,
@@ -59,6 +60,7 @@ class TestGittyMaven(TestCase):
 
         # init the context
         context = {}
+        maven.is_in_use(context)
         # we'll act as if this is on the master branch
         GittyCommand.add_branch_info_to_context(context, 'master')
         # print(context)
@@ -78,13 +80,14 @@ class TestGittyMaven(TestCase):
         # where are we?
         cwd = os.path.dirname(__file__)
         # from here, this is where the pom is...
-        os.chdir(cwd + '/maven_sample_snapshot')
+        os.chdir(cwd + '/sample_files/maven_snapshot')
         maven = GittyMaven()
         expected = {
             'current_branch': '1.0/master',
             'is_stable': True,
             'branch_parts': ['1.0', 'master'],
             'project_file': 'pom.xml',
+            'project_type_name': 'maven',
             'current_version': '1.0.0-SNAPSHOT',
             'hotfix': False,
             'release_version': '1.0.0',
@@ -103,6 +106,7 @@ class TestGittyMaven(TestCase):
 
         # init the context
         context = {}
+        maven.is_in_use(context)
         # we'll act as if this is on the master branch
         GittyCommand.add_branch_info_to_context(context, '1.0/master')
         # print(context)
@@ -122,9 +126,10 @@ class TestGittyMaven(TestCase):
         # where are we?
         cwd = os.path.dirname(__file__)
         # from here, this is where the pom is...
-        os.chdir(cwd + '/maven_sample_snapshot')
+        os.chdir(cwd + '/sample_files/maven_snapshot')
         maven = GittyMaven()
         expected = {
+            'project_type_name': 'maven',
             'current_branch': 'tasks/123_snapped_the_frame',
             'is_stable': False,
             'branch_parts': ['tasks', '123_snapped_the_frame'],
@@ -147,6 +152,7 @@ class TestGittyMaven(TestCase):
 
         # init the context
         context = {}
+        maven.is_in_use(context)
         # we'll act as if this is on the master branch
         GittyCommand.add_branch_info_to_context(context, 'tasks/123_snapped_the_frame')
         # print(context)
@@ -155,9 +161,10 @@ class TestGittyMaven(TestCase):
         # print(context)
 
         for key in context.keys():
-            # print(key)
             self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
-        self.assertEqual(len(expected), len(context))
+        for key in expected.keys():
+            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
+        # self.assertEqual(len(expected), len(context))
 
         # go back where we started
         os.chdir(cwd)
@@ -166,12 +173,13 @@ class TestGittyMaven(TestCase):
         # where are we?
         cwd = os.path.dirname(__file__)
         # from here, this is where the pom is...
-        os.chdir(cwd + '/maven_sample_snapshot')
+        os.chdir(cwd + '/sample_files/maven_snapshot')
         maven = GittyMaven()
         expected = {
             'current_branch': '1.0/tasks/123_snapped_the_frame',
             'is_stable': True,
             'branch_parts': ['1.0', 'tasks', '123_snapped_the_frame'],
+            'project_type_name': 'maven',
             'project_file': 'pom.xml',
             'current_version': '1.0.0-SNAPSHOT',
             'hotfix': False,
@@ -191,6 +199,7 @@ class TestGittyMaven(TestCase):
 
         # init the context
         context = {}
+        maven.is_in_use(context)
         # we'll act as if this is on the master branch
         GittyCommand.add_branch_info_to_context(context, '1.0/tasks/123_snapped_the_frame')
         # print(context)
@@ -210,12 +219,13 @@ class TestGittyMaven(TestCase):
         # where are we?
         cwd = os.path.dirname(__file__)
         # from here, this is where the pom is...
-        os.chdir(cwd + '/maven_sample_release')
+        os.chdir(cwd + '/sample_files/maven_release')
         maven = GittyMaven()
         expected = {
             'current_branch': '1.2/releases',
             'is_stable': True,
             'branch_parts': ['1.2', 'releases'],
+            'project_type_name': 'maven',
             'project_file': 'pom.xml',
             'current_version': '1.2.3',
             'hotfix': True,
@@ -235,6 +245,7 @@ class TestGittyMaven(TestCase):
 
         # init the context
         context = {}
+        maven.is_in_use(context)
         # we'll act as if this is on the master branch
         GittyCommand.add_branch_info_to_context(context, '1.2/releases')
         # print(context)
@@ -254,7 +265,7 @@ class TestGittyMaven(TestCase):
         # where are we?
         cwd = os.path.dirname(__file__)
         # from here, this is where the pom is...
-        os.chdir(cwd + '/maven_sample_snapshot')
+        os.chdir(cwd + '/sample_files/maven_snapshot')
 
         # copy the pom to a temp location first
         temp_dir = tempfile.mkdtemp()
@@ -280,7 +291,7 @@ class TestGittyMaven(TestCase):
         # where are we?
         cwd = os.path.dirname(__file__)
         # from here, this is where the pom is...
-        os.chdir(cwd + '/maven_sample_snapshot')
+        os.chdir(cwd + '/sample_files/maven_snapshot')
 
         # copy the pom to a temp location first
         temp_dir = tempfile.mkdtemp()

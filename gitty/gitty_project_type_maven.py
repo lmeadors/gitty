@@ -18,18 +18,13 @@ class GittyMaven(GittyProjectType):
         return 'maven'
 
     def is_in_use(self, context):
-        # print('is there a pom.xml file in {}?'.format(path.curdir))
-        # for f in listdir(path.curdir):
-        #     print(f)
-
         is_maven = path.exists('pom.xml')
-        # print('is maven: {}'.format(is_maven))
         if is_maven:
             context['project_type_name'] = self.get_name()
+            context['project_file'] = 'pom.xml'
         return is_maven
 
     def get_version_info(self, context):
-        context['project_file'] = 'pom.xml'
         pom_ns = 'http://maven.apache.org/POM/4.0.0'
         ns = {'pom': pom_ns}
         ElementTree.register_namespace('', pom_ns)
