@@ -50,12 +50,7 @@ def command_setup(context):
 
     try:
         current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
-        context['current_branch'] = current_branch_output.decode().strip()
-        context['branch_parts'] = context['current_branch'].split("/")
-        if len(context['branch_parts']) > 1 and context['branch_parts'][0] != 'tasks':
-            context['task_prefix'] = context['branch_parts'][0] + '/tasks/'
-        else:
-            context['task_prefix'] = 'tasks/'
+        GittyCommand.add_branch_info_to_context(context, current_branch_output.decode().strip())
 
     except subprocess.CalledProcessError:
         print(Color.red_lt('current directory is not a git repository'))
@@ -85,6 +80,68 @@ class GittyCommand:
 
     # these are the steps needed to accomplish this command
     _steps = []
+
+    @staticmethod
+    def add_branch_info_to_context(context, current_branch):
+
+        # split the branch name into its components
+        branch_parts = current_branch.split("/")
+
+        # are we on THE master branch or any other master branch?
+        the_master = current_branch == 'master'
+        a_master = branch_parts[-1] == 'master'
+
+        # are we on a task branch?
+        a_task = 'tasks' in branch_parts
+        a_release = 'releases' in branch_parts
+
+        if not a_task and not a_release:
+            if the_master:
+                task_prefix = 'tasks/'
+            else:
+                task_prefix = branch_parts[0] + '/tasks/'
+        else:
+            # we're on a task or release branch - we don't create task branches from those
+            task_prefix = None
+
+        # figure out if we're in a stabilization ecosystem
+        part_count = len(branch_parts)
+        if part_count > 2:
+            # this is a task on a stabilization ecosystem
+            is_stable = True
+        elif the_master:
+            # THE master is not a stabilization ecosystem
+            is_stable = False
+        elif a_release:
+            # a release only comes from a stabilization ecosystem
+            is_stable = True
+        elif a_master:
+            # a master that isn't THE master is in a stabilization ecosystem
+            is_stable = True
+        else:
+            is_stable = False
+
+        if the_master:
+            # no release branch in this case - this is so the project types don't have to set this
+            context['current_release_branch'] = None
+            context['new_stabilization_version'] = None
+
+        if a_task:
+            # no release or stabilization from here - this is so the project types don't have to set this
+            context['new_stabilization_branch'] = None
+            context['new_stabilization_version'] = None
+            context['new_release_branch'] = None
+            context['current_release_branch'] = None
+
+        # update the context with the additional branch info
+        context['current_branch'] = current_branch
+        context['the_master'] = the_master
+        context['branch_parts'] = branch_parts
+        context['a_master'] = a_master
+        context['a_task'] = a_task
+        context['a_release'] = a_release
+        context['task_prefix'] = task_prefix
+        context['is_stable'] = is_stable
 
     @staticmethod
     def title_format(title):

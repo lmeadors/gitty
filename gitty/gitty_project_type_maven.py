@@ -3,12 +3,14 @@ from xml.etree import ElementTree
 
 from gitty import GittyProjectType
 
+
 # this is to make the xml in the pom retain comments...
 class CommentedTreeBuilder(ElementTree.TreeBuilder):
     def comment(self, data):
         self.start(ElementTree.Comment, {})
         self.data(data)
         self.end(ElementTree.Comment)
+
 
 class GittyMaven(GittyProjectType):
 
@@ -23,7 +25,7 @@ class GittyMaven(GittyProjectType):
         is_maven = path.exists('pom.xml')
         # print('is maven: {}'.format(is_maven))
         if is_maven:
-            context['project_type_name'] = 'maven'
+            context['project_type_name'] = self.get_name()
         return is_maven
 
     def get_version_info(self, context):
@@ -45,27 +47,36 @@ class GittyMaven(GittyProjectType):
 
         if context['current_version'].endswith('-SNAPSHOT'):
 
+            # we're not on a release branch
             context['hotfix'] = False
 
             context['release_version'] = context['current_version'][: -9]
 
             # build the next version
             release_version_split = context['release_version'].split(".")
-            if len(context['branch_parts']) > 1:
-                # we're already on a stabilization branch, so this includes the full version
-                context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
-                context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
-                context['new_stabilization_version'] = '.'.join(release_version_split) + '.0-SNAPSHOT'
+            if context['a_task']:
+                context['new_stabilization_branch'] = None
+                context['new_release_branch'] = None
+                context['new_stabilization_version'] = None
             else:
-                # we're on master, so we want to only include major.minor
-                context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/master'
-                context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
-                context['new_stabilization_version'] = '.'.join(release_version_split) + '.0-SNAPSHOT'
+                if context['is_stable']:
+                    # we're already on a stabilization branch, so this includes the full version
+                    context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
+                    context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
+                    context['new_stabilization_version'] = '.'.join(release_version_split) + '.0-SNAPSHOT'
+                else:
+                    # we're not in a stabilization ecosystem - this will make an inner one...
+                    context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/master'
+                    context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
+                    context['new_stabilization_version'] = '.'.join(release_version_split) + '-SNAPSHOT'
 
-            context['current_release_branch'] = '/'.join([
-                context['branch_parts'][0],
-                'releases'
-            ])
+            if context['is_stable']:
+                context['current_release_branch'] = '/'.join([
+                    context['branch_parts'][0],
+                    'releases'
+                ])
+            else:
+                context['current_release_branch'] = None
 
             next_sub = str(int(release_version_split[2]) + 1)
             next_min = str(int(release_version_split[1]) + 1)
