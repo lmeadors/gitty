@@ -48,6 +48,8 @@ def command_setup(context):
             context['project_type_name'] = project_type.get_name()
             break
 
+    GittyCommand.verify_context_has_project_type_info(context)
+
     try:
         # this is a hack for testing...it would be better to get this indirectly instead of calling git, something like
         # context['get_current_branch'].get() - that way, we could put a component in the context to get it from that
@@ -61,7 +63,7 @@ def command_setup(context):
         GittyCommand.add_branch_info_to_context(context, current_branch)
 
     except subprocess.CalledProcessError:
-        print(Color.red_lt('current directory is not a git repository'))
+        print(Color.red_lt('current directory is not a git repository - setting "dry_run=True"'))
         context['current_branch'] = None
         context['branch_parts'] = None
         context['task_prefix'] = None
@@ -234,9 +236,46 @@ class GittyCommand:
             return bytes(0)
 
     @staticmethod
+    def verify_context_has_version_info(context):
+        expected_keys = [
+            'current_release_branch',
+            'current_version',
+            'hotfix',
+            'new_release_branch',
+            'new_stabilization_branch',
+            'new_stabilization_version',
+            'next_master_version',
+            'next_stable_version',
+            'release_version',
+        ]
+        for key in expected_keys:
+            if key not in context:
+                print(Color.yellow(
+                    'expected to find key "{}" in context, but it was not present - this can cause problems'.format(
+                        key
+                    )
+                ))
+
+    @staticmethod
+    def verify_context_has_project_type_info(context):
+        expected_keys = [
+            'project_type',
+            'project_type_name',
+            'project_file',
+        ]
+        for key in expected_keys:
+            if key not in context:
+                print(Color.yellow(
+                    'expected to find key "{}" in context, but it was not present - this can cause problems'.format(
+                        key
+                    )
+                ))
+
+    @staticmethod
     def get_version_info(context):
 
         context['project_type'].get_version_info(context)
+        GittyCommand.verify_context_has_version_info(context)
 
         if context['current_branch'] is None:
             return context
