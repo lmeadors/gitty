@@ -38,13 +38,13 @@ class GittyRelease(GittyCommand):
         GitCommandStep('git tag %s', ['release_version']),
 
         GitCommandStep('git checkout %s', ['new_stabilization_branch']),
-        GitCommandStep('$ git merge --strategy=ours %s', ['new_release_branch']),
+        GitCommandStep('git merge --strategy=ours %s', ['new_release_branch']),
         BumpVersionStep('next_stable_version'),
         GitCommandStep('git add %s', ['project_file']),
         GitCommandBump('next_stable_version'),
 
         GitCommandStep('git checkout %s', ['parent_version_branch']),
-        GitCommandStep('$ git merge --strategy=ours %s', ['new_stabilization_branch']),
+        GitCommandStep('git merge --strategy=ours %s', ['new_stabilization_branch']),
         BumpVersionStep('next_master_version'),
         GitCommandStep('git add %s', ['project_file']),
         GitCommandBump('next_master_version'),
