@@ -38,13 +38,13 @@ class GittyRelease(GittyCommand):
         GitCommandStep('git tag %s', ['release_version']),
 
         GitCommandStep('git checkout %s', ['new_stabilization_branch']),
-        GitCommandStep('$ git merge --strategy=ours %s', ['new_release_branch']),
+        GitCommandStep('git merge --strategy=ours %s', ['new_release_branch']),
         BumpVersionStep('next_stable_version'),
         GitCommandStep('git add %s', ['project_file']),
         GitCommandBump('next_stable_version'),
 
         GitCommandStep('git checkout %s', ['parent_version_branch']),
-        GitCommandStep('$ git merge --strategy=ours %s', ['new_stabilization_branch']),
+        GitCommandStep('git merge --strategy=ours %s', ['new_stabilization_branch']),
         BumpVersionStep('next_master_version'),
         GitCommandStep('git add %s', ['project_file']),
         GitCommandBump('next_master_version'),
@@ -62,16 +62,16 @@ class GittyRelease(GittyCommand):
             return False
 
         # don't create a release from a task branch
-        return not context['on_a_task']
+        return not context['a_task']
 
     def get_description(self, context):
-        if context['master']:
+        if context['the_master']:
             return GittyCommand.describe_steps(self._steps_from_master, context)
         else:
             return GittyCommand.describe_steps(self._steps_from_point, context)
 
     def do_it(self, context):
-        if context['master']:
+        if context['the_master']:
             GittyCommand.execute_steps(self._steps_from_master, context)
         else:
             GittyCommand.execute_steps(self._steps_from_point, context)

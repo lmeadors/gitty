@@ -29,7 +29,7 @@ Next, you want to build the deployment artifact from the matching release branch
 
 Now, make sure it's a clean build by removing some junk, and do a build:
 
-    rm -rf dist build
+    rm -rf dist build htmlcov
     python3 setup.py sdist bdist_wheel
 
 Instructions for deploying are below...

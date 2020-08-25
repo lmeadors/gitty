@@ -36,7 +36,7 @@ def setup(context):
     context['command'] = context.get('command', 'help')
 
     if context.get('no_color', False):
-        Color.no_color()
+        Color.disable_color()
 
     command_setup(context)
 
