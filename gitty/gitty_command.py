@@ -16,6 +16,12 @@ def command_setup(context):
     from .gitty_command_stabilize import GittyStabilize
     from .gitty_command_task import GittyTask
     from .gitty_command_version import GittyVersion
+    from .gitty_git_api import GitAPI
+    from .gitty_git_api import CommandExecutor
+
+    # set up the git API
+    context['executor'] = CommandExecutor()
+    context['git_api'] = GitAPI(context["executor"])
 
     # register the available commands
     context["commands"] = [
@@ -48,22 +54,29 @@ def command_setup(context):
             context['project_type_name'] = project_type.get_name()
             break
 
+    GittyCommand.verify_context_has_project_type_info(context)
+
     try:
-        current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
-        context['current_branch'] = current_branch_output.decode().strip()
-        context['branch_parts'] = context['current_branch'].split("/")
-        if len(context['branch_parts']) > 1 and context['branch_parts'][0] != 'tasks':
-            context['task_prefix'] = context['branch_parts'][0] + '/tasks/'
-        else:
-            context['task_prefix'] = 'tasks/'
+        current_branch = context['git_api'].get_current_branch(context)
+        GittyCommand.add_branch_info_to_context(context, current_branch)
 
     except subprocess.CalledProcessError:
-        print(Color.red_lt('current directory is not a git repository'))
-        context['current_branch'] = None
-        context['branch_parts'] = None
-        context['task_prefix'] = None
+
         # be extra sure we don't change anything here...
         context['dry_run'] = True
+
+        print(Color.red_lt('current directory is not a git repository - set "dry_run=True"'))
+        # set the git branch info all to "None"
+        for key in [
+            'current_branch',
+            'current_release_branch',
+            'new_release_branch',
+            'new_stabilization_branch',
+            'branch_parts',
+            'task_prefix',
+            'hotfix'
+        ]:
+            context[key] = None
 
     # now that we know what kind of project we have, get the version info from it
     GittyCommand.get_version_info(context)
@@ -85,6 +98,68 @@ class GittyCommand:
 
     # these are the steps needed to accomplish this command
     _steps = []
+
+    @staticmethod
+    def add_branch_info_to_context(context, current_branch):
+
+        # split the branch name into its components
+        branch_parts = current_branch.split("/")
+
+        # are we on THE master branch or any other master branch?
+        the_master = current_branch == 'master'
+        a_master = branch_parts[-1] == 'master'
+
+        # are we on a task branch?
+        a_task = 'tasks' in branch_parts
+        a_release = 'releases' in branch_parts
+
+        if not a_task and not a_release:
+            if the_master:
+                task_prefix = 'tasks/'
+            else:
+                task_prefix = branch_parts[0] + '/tasks/'
+        else:
+            # we're on a task or release branch - we don't create task branches from those
+            task_prefix = None
+
+        # figure out if we're in a stabilization ecosystem
+        part_count = len(branch_parts)
+        if part_count > 2:
+            # this is a task on a stabilization ecosystem
+            is_stable = True
+        elif the_master:
+            # THE master is not a stabilization ecosystem
+            is_stable = False
+        elif a_release:
+            # a release only comes from a stabilization ecosystem
+            is_stable = True
+        elif a_master:
+            # a master that isn't THE master is in a stabilization ecosystem
+            is_stable = True
+        else:
+            is_stable = False
+
+        if the_master:
+            # no release branch in this case - this is so the project types don't have to set this
+            context['current_release_branch'] = None
+            context['new_stabilization_version'] = None
+
+        if a_task:
+            # no release or stabilization from here - this is so the project types don't have to set this
+            context['new_stabilization_branch'] = None
+            context['new_stabilization_version'] = None
+            context['new_release_branch'] = None
+            context['current_release_branch'] = None
+
+        # update the context with the additional branch info
+        context['current_branch'] = current_branch
+        context['the_master'] = the_master
+        context['branch_parts'] = branch_parts
+        context['a_master'] = a_master
+        context['a_task'] = a_task
+        context['a_release'] = a_release
+        context['task_prefix'] = task_prefix
+        context['is_stable'] = is_stable
 
     @staticmethod
     def title_format(title):
@@ -169,32 +244,55 @@ class GittyCommand:
             return bytes(0)
 
     @staticmethod
+    def verify_context_has_version_info(context):
+        expected_keys = [
+            'current_release_branch',
+            'current_version',
+            'hotfix',
+            'new_release_branch',
+            'new_stabilization_branch',
+            'new_stabilization_version',
+            'next_master_version',
+            'next_stable_version',
+            'release_version',
+        ]
+        for key in expected_keys:
+            if key not in context:
+                print(Color.yellow(
+                    'expected to find key "{}" in context, but it was not present - this can cause problems'.format(
+                        key
+                    )
+                ))
+
+    @staticmethod
+    def verify_context_has_project_type_info(context):
+        expected_keys = [
+            'project_type',
+            'project_type_name',
+            'project_file',
+        ]
+        for key in expected_keys:
+            if key not in context:
+                print(Color.yellow(
+                    'expected to find key "{}" in context, but it was not present - this can cause problems'.format(
+                        key
+                    )
+                ))
+
+    @staticmethod
     def get_version_info(context):
 
         context['project_type'].get_version_info(context)
+        GittyCommand.verify_context_has_version_info(context)
 
         if context['current_branch'] is None:
             return context
 
-        context['master'] = True
-        if context['branch_parts'] is not None:
-            if len(context['branch_parts']) > 1:
-                context['master'] = False
-
-        if context['branch_parts'][0] == 'tasks' or context['branch_parts'][0] == 'master':
-            context['stabilization'] = False
-        else:
-            context['stabilization'] = True
-
-        context['on_a_task'] = context['current_branch'].startswith(context['task_prefix'])
-        context['on_a_master'] = (context['branch_parts'][-1] == 'master')
-        context['on_a_release'] = (context['branch_parts'][-1] == 'releases')
-
         context['current_version_parts'] = context['current_version'].split('.')
 
-        if context['stabilization']:
-            if context['on_a_task'] or context['on_a_release']:
-                # we're working a task - the parent is different...
+        if context['is_stable']:
+            if context['a_task'] or context['a_release']:
+                # we're on a task or release branch - the parent is different...
                 context['parent_version_branch'] = context['branch_parts'][0] + '/master'
             else:
                 if len(context['current_version_parts']) < 4:
@@ -207,9 +305,6 @@ class GittyCommand:
             context['parent_version_branch'] = 'master'
 
         return context
-
-    def bump_version_to(self, context, new_version):
-        context['project_type'].bump_version_to(context, new_version)
 
 
 # this class describes the API for a command step - a series of these in a list will be used to define a command
@@ -300,3 +395,4 @@ class BumpVersionStep(CommandStep):
 
     def execute(self, context):
         context['project_type'].bump_version_to(context, context[self.new_version_name])
+

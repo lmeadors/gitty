@@ -23,7 +23,7 @@ class GittyTask(GittyCommand):
             return False
 
         # don't make a task from a task.
-        return not context['on_a_task']
+        return not context['a_task']
 
     def do_it(self, context):
         # we need a task name - like 123234_some_task_name

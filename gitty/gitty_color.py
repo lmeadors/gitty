@@ -1,66 +1,108 @@
+import inspect
+
+
 class Color:
-    _black = '\u001b[30m'
-    _black_lt = '\u001b[30;1m'
-    _red = '\u001b[31m'
-    _red_lt = '\u001b[31;1m'
-    _green = '\u001b[32m'
-    _green_lt = '\u001b[32;1m'
-    _yellow = '\u001b[33m'
-    _yellow_lt = '\u001b[33;1m'
-    _blue = '\u001b[34m'
-    _blue_lt = '\u001b[34;1m'
-    _magenta = '\u001b[35m'
-    _magenta_lt = '\u001b[35;1m'
-    _cyan = '\u001b[36m'
-    _cyan_lt = '\u001b[36;1m'
-    _white = '\u001b[37m'
-    _white_lt = '\u001b[37;1m'
-    _reset = '\u001b[0m'
+
+    # define the colors dictionary, but leave it empty for now...
+    colors = {}
 
     @staticmethod
-    def no_color():
-        Color._black = ''
-        Color._black_lt = ''
-        Color._red = ''
-        Color._red_lt = ''
-        Color._green = ''
-        Color._green_lt = ''
-        Color._yellow = ''
-        Color._yellow_lt = ''
-        Color._blue = ''
-        Color._blue_lt = ''
-        Color._magenta = ''
-        Color._magenta_lt = ''
-        Color._cyan = ''
-        Color._cyan_lt = ''
-        Color._white = ''
-        Color._white_lt = ''
-        Color._reset = ''
+    def enable_color():
+        Color.colors = {
+            'black': '\u001b[30m',
+            'black_lt': '\u001b[30;1m',
+            'red': '\u001b[31m',
+            'red_lt': '\u001b[31;1m',
+            'green': '\u001b[32m',
+            'green_lt': '\u001b[32;1m',
+            'yellow': '\u001b[33m',
+            'yellow_lt': '\u001b[33;1m',
+            'blue': '\u001b[34m',
+            'blue_lt': '\u001b[34;1m',
+            'magenta': '\u001b[35m',
+            'magenta_lt': '\u001b[35;1m',
+            'cyan': '\u001b[36m',
+            'cyan_lt': '\u001b[36;1m',
+            'white': '\u001b[37m',
+            'white_lt': '\u001b[37;1m',
+            'reset': '\u001b[0m',
+        }
+
+    @staticmethod
+    def disable_color():
+        Color.colors = {}
+
+    @staticmethod
+    def color(text, some_color):
+        return '{}{}{}'.format(Color.colors.get(some_color, ''), text, Color.colors.get('reset', ''))
+
+    @staticmethod
+    def reset(text):
+        return Color.color(text, inspect.stack()[0][3])
+
+    @staticmethod
+    def white(text):
+        return Color.color(text, inspect.stack()[0][3])
 
     @staticmethod
     def white_lt(text):
-        return '{}{}{}'.format(Color._white_lt, text, Color._reset)
+        return Color.color(text, inspect.stack()[0][3])
+
+    @staticmethod
+    def black(text):
+        return Color.color(text, inspect.stack()[0][3])
+
+    @staticmethod
+    def black_lt(text):
+        return Color.color(text, inspect.stack()[0][3])
 
     @staticmethod
     def red(text):
-        return '{}{}{}'.format(Color._red, text, Color._reset)
+        return Color.color(text, inspect.stack()[0][3])
 
     @staticmethod
     def red_lt(text):
-        return '{}{}{}'.format(Color._red_lt, text, Color._reset)
+        return Color.color(text, inspect.stack()[0][3])
 
     @staticmethod
     def green(text):
-        return '{}{}{}'.format(Color._green, text, Color._reset)
+        return Color.color(text, inspect.stack()[0][3])
+
+    @staticmethod
+    def green_lt(text):
+        return Color.color(text, inspect.stack()[0][3])
 
     @staticmethod
     def yellow(text):
-        return '{}{}{}'.format(Color._yellow, text, Color._reset)
+        return Color.color(text, inspect.stack()[0][3])
+
+    @staticmethod
+    def yellow_lt(text):
+        return Color.color(text, inspect.stack()[0][3])
+
+    @staticmethod
+    def magenta(text):
+        return Color.color(text, inspect.stack()[0][3])
+
+    @staticmethod
+    def magenta_lt(text):
+        return Color.color(text, inspect.stack()[0][3])
 
     @staticmethod
     def blue(text):
-        return '{}{}{}'.format(Color._blue, text, Color._reset)
+        return Color.color(text, inspect.stack()[0][3])
 
     @staticmethod
     def blue_lt(text):
-        return '{}{}{}'.format(Color._blue_lt, text, Color._reset)
+        return Color.color(text, inspect.stack()[0][3])
+
+    @staticmethod
+    def cyan(text):
+        return Color.color(text, inspect.stack()[0][3])
+
+    @staticmethod
+    def cyan_lt(text):
+        return Color.color(text, inspect.stack()[0][3])
+
+
+Color.enable_color()
