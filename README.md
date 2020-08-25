@@ -2,7 +2,8 @@
 
 This project provides an easy way to deal with git branches in an environment with multiple parallel development streams.
 
-![downloads this month] (https://img.shields.io/pypi/dm/gitty)
+![downloads this month] 
+(https://img.shields.io/pypi/dm/gitty)
 
 Some assumptions:
 
