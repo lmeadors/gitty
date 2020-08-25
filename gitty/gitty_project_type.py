@@ -25,14 +25,24 @@ class GittyUnknownProjectType(GittyProjectType):
         return 'unknown'
 
     def is_in_use(self, context):
+        context['project_type_name'] = self.get_name()
+        context['project_file'] = None
         return True
 
     def get_version_info(self, context):
-        print('unable to get version info for unknown project type')
-        context['project_file'] = None
-        context['current_version'] = 'unknown'
+        from gitty import Color
+        print(Color.red_lt('unable to get version info for unknown project type'))
+        for key in [
+            'current_version',
+            'new_stabilization_version',
+            'next_master_version',
+            'next_stable_version',
+            'release_version'
+        ]:
+            context[key] = None
 
     def bump_version_to(self, context, new_version):
-        print('unable to set version for unknown project type')
+        from gitty import Color
+        print(Color.red_lt('unable to set version for unknown project type'))
 
 

@@ -64,7 +64,7 @@ class GittyStabilize(GittyCommand):
             return False
 
         # don't create a stabilization ecosystem from a task
-        return not context['on_a_task']
+        return not context['a_task']
 
     def do_it(self, context):
         if len(context['branch_parts']) > 1:

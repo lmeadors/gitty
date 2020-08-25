@@ -9,8 +9,14 @@ class GittyPip(GittyProjectType):
     def get_name(self):
         return 'pip'
 
+    def is_in_use(self, context):
+        is_pip = path.exists('setup.py')
+        if is_pip:
+            context['project_type_name'] = self.get_name()
+            context['project_file'] = 'setup.py'
+        return is_pip
+
     def get_version_info(self, context):
-        context['project_file'] = 'setup.py'
         setup = run_setup(context['project_file'], stop_after='config')
 
         current_version = setup.metadata.version
@@ -29,7 +35,7 @@ class GittyPip(GittyProjectType):
         next_master_version = '.'.join([
             current_version_split[0],
             str(int(current_version_split[1]) + 1),
-            current_version_split[2]
+            '0'
         ])
         context['next_master_version'] = next_master_version
 
@@ -43,12 +49,9 @@ class GittyPip(GittyProjectType):
         if len(context['branch_parts']) > 1:
             context['current_release_branch'] = stable_branch_version + '/releases'
         else:
-            context['current_release_branch'] = 'n/a'
+            context['current_release_branch'] = None
 
         context['new_stabilization_version'] = 'unknown'
-
-    def is_in_use(self, context):
-        return path.exists('setup.py')
 
     def bump_version_to(self, context, new_version):
         # we need to read in the setup.py file and replace the
