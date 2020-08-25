@@ -21,7 +21,7 @@ class TestGittyProjectType(TestCase):
         self.assertEqual('unknown', project.get_name())
 
         project.get_version_info(context)
-        self.assertEqual('unknown', context['current_version'])
+        self.assertIsNone(context['current_version'])
         self.assertIsNone(context['project_file'])
 
         project.bump_version_to(context, 'foo')

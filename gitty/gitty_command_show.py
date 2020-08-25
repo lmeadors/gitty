@@ -15,6 +15,8 @@ class ShowStep(CommandStep):
             return {x: con[x] for x in con if x not in {
                 # some context elements can't be represented as json - exclude them here
                 'commands',
+                'executor',
+                'git_api',
                 'project_type'
             }}
 

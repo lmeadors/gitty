@@ -16,6 +16,12 @@ def command_setup(context):
     from .gitty_command_stabilize import GittyStabilize
     from .gitty_command_task import GittyTask
     from .gitty_command_version import GittyVersion
+    from .gitty_git_api import GitAPI
+    from .gitty_git_api import CommandExecutor
+
+    # set up the git API
+    context['executor'] = CommandExecutor()
+    context['git_api'] = GitAPI(context["executor"])
 
     # register the available commands
     context["commands"] = [
@@ -51,24 +57,26 @@ def command_setup(context):
     GittyCommand.verify_context_has_project_type_info(context)
 
     try:
-        # this is a hack for testing...it would be better to get this indirectly instead of calling git, something like
-        # context['get_current_branch'].get() - that way, we could put a component in the context to get it from that
-        # was either a static test component, or one that talked to git. then we could test both parts independently.
-        if context.get('current_branch', None) is None:
-            current_branch_output = subprocess.check_output('git rev-parse --abbrev-ref HEAD'.split())
-            current_branch = current_branch_output.decode().strip()
-        else:
-            current_branch = context['current_branch']
-
+        current_branch = context['git_api'].get_current_branch(context)
         GittyCommand.add_branch_info_to_context(context, current_branch)
 
     except subprocess.CalledProcessError:
-        print(Color.red_lt('current directory is not a git repository - setting "dry_run=True"'))
-        context['current_branch'] = None
-        context['branch_parts'] = None
-        context['task_prefix'] = None
+
         # be extra sure we don't change anything here...
         context['dry_run'] = True
+
+        print(Color.red_lt('current directory is not a git repository - set "dry_run=True"'))
+        # set the git branch info all to "None"
+        for key in [
+            'current_branch',
+            'current_release_branch',
+            'new_release_branch',
+            'new_stabilization_branch',
+            'branch_parts',
+            'task_prefix',
+            'hotfix'
+        ]:
+            context[key] = None
 
     # now that we know what kind of project we have, get the version info from it
     GittyCommand.get_version_info(context)
@@ -387,3 +395,4 @@ class BumpVersionStep(CommandStep):
 
     def execute(self, context):
         context['project_type'].bump_version_to(context, context[self.new_version_name])
+
