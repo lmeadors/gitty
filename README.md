@@ -1,11 +1,11 @@
 # gitty - a simple alternative to git flow with less rigidity
 
+
 This project provides an easy way to deal with git branches in an environment with multiple parallel development streams.
 
-![downloads this month] 
-(https://img.shields.io/pypi/dm/gitty.png)
+<img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/gitty">
 
-Some assumptions:
+### Some assumptions:
 
 - the `master` branch is the cutting edge of new development
 - release stabilization branches are created for each major and minor release
