@@ -204,3 +204,74 @@ class TestGittyNode(ProjectTypeTestCase):
 
         # go back where we started
         os.chdir(cwd)
+
+    def test_bump_version(self):
+
+        # go to the sample directory
+        cwd = self.go_to_sample_dir()
+
+        # copy the pom to a temp location (and go there)
+        destination = self.copy_sample_to_temp_dir('package.json')
+
+        context = {
+            'project_file': 'package.json',
+            'dry_run': False,
+            'branch_parts': ['master'],
+            'a_task': False,
+            'is_stable': False,
+        }
+        new_version = '1.3.5'
+
+        project = GittyNode()
+
+        # pre-check the version
+        project.get_version_info(context)
+        self.assertEqual('1.2.4', context['current_version'])
+
+        # update the version
+        project.bump_version_to(context, new_version)
+
+        # check the version after we bump it
+        project.get_version_info(context)
+        self.assertEqual(new_version, context['current_version'])
+
+        # remove the copied project file
+        os.remove(destination)
+
+        # go back where we started
+        os.chdir(cwd)
+
+    def test_do_not_bump_version_if_dry_run(self):
+
+        cwd = self.go_to_sample_dir()
+
+        # copy the pom to a temp location first
+        destination = self.copy_sample_to_temp_dir('package.json')
+
+        context = {
+            'project_file': 'package.json',
+            'dry_run': True,
+            'branch_parts': ['master'],
+            'a_task': False,
+            'is_stable': False,
+        }
+
+        project = GittyNode()
+
+        # pre-check the version
+        project.get_version_info(context)
+        self.assertEqual('1.2.4', context['current_version'])
+
+        # set it...but not really - just a dry run...
+        new_version = '1.3.5'
+        project.bump_version_to(context, new_version)
+
+        # verify it did not change
+        project.get_version_info(context)
+        self.assertEqual('1.2.4', context['current_version'])
+
+        # clean up the mess
+        os.remove(destination)
+
+        # go back where we started
+        os.chdir(cwd)

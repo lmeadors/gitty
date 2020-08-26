@@ -1,9 +1,6 @@
 import os
 import tempfile
 from shutil import copyfile
-from unittest import TestCase
-
-from gitty import GittyCommand
 from gitty.gitty_project_type_maven import GittyMaven
 from tests.test_gitty_project_type_base_test import ProjectTypeTestCase
 
@@ -195,19 +192,13 @@ class TestGittyMaven(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_bump_version(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_snapshot')
 
-        # copy the pom to a temp location first
-        temp_dir = tempfile.mkdtemp()
-        print(temp_dir)
-        pom_xml = 'pom.xml'
-        destination = '/'.join([temp_dir, pom_xml])
-        copyfile(pom_xml, destination)
-        os.chdir(temp_dir)
-        maven = GittyMaven()
+        # go to the sample directory
+        cwd = self.go_to_sample_dir()
+
+        # copy the pom to a temp location (and go there)
+        destination = self.copy_sample_to_temp_dir('pom.xml')
+
         context = {
             'dry_run': False,
             'branch_parts': ['master'],
@@ -215,32 +206,56 @@ class TestGittyMaven(ProjectTypeTestCase):
             'is_stable': False,
         }
         new_version = '1.3.5-SNAPSHOT'
+
+        maven = GittyMaven()
+
+        # pre-check the version
+        maven.get_version_info(context)
+        self.assertEqual('1.0.0-SNAPSHOT', context['current_version'])
+
+        # update the version
         maven.bump_version_to(context, new_version)
+
+        # check the version after we bump it
         maven.get_version_info(context)
         self.assertEqual(new_version, context['current_version'])
+
+        # remove the copied project file
         os.remove(destination)
 
+        # go back where we started
+        os.chdir(cwd)
+
     def test_do_not_bump_version_if_dry_run(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_snapshot')
+
+        cwd = self.go_to_sample_dir()
 
         # copy the pom to a temp location first
-        temp_dir = tempfile.mkdtemp()
-        pom_xml = 'pom.xml'
-        destination = '/'.join([temp_dir, pom_xml])
-        copyfile(pom_xml, destination)
-        os.chdir(temp_dir)
-        maven = GittyMaven()
+        destination = self.copy_sample_to_temp_dir('pom.xml')
+
         context = {
             'dry_run': True,
             'branch_parts': ['master'],
             'a_task': False,
             'is_stable': False,
         }
-        new_version = '1.3.5-SNAPSHOT'
-        maven.bump_version_to(context, new_version)
+
+        maven = GittyMaven()
+
+        # pre-check the version
         maven.get_version_info(context)
         self.assertEqual('1.0.0-SNAPSHOT', context['current_version'])
+
+        # set it...but not really - just a dry run...
+        new_version = '1.3.5-SNAPSHOT'
+        maven.bump_version_to(context, new_version)
+
+        # verify it did not change
+        maven.get_version_info(context)
+        self.assertEqual('1.0.0-SNAPSHOT', context['current_version'])
+
+        # clean up the mess
         os.remove(destination)
+
+        # go back where we started
+        os.chdir(cwd)

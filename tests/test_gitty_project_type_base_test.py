@@ -1,5 +1,6 @@
 import os
 import tempfile
+from shutil import copyfile
 from unittest.case import TestCase
 
 from gitty import GittyCommand
@@ -40,3 +41,10 @@ class ProjectTypeTestCase(TestCase):
             # print(key)
             self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
         self.assertEqual(len(expected), len(context))
+
+    def copy_sample_to_temp_dir(self, project_file):
+        temp_dir = tempfile.mkdtemp()
+        destination = '/'.join([temp_dir, project_file])
+        copyfile(project_file, destination)
+        os.chdir(temp_dir)
+        return destination
