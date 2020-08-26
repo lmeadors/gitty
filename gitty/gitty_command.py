@@ -287,6 +287,8 @@ class GittyCommand:
 
         if context['current_branch'] is None:
             return context
+        if context['current_version'] is None:
+            return context
 
         context['current_version_parts'] = context['current_version'].split('.')
 
