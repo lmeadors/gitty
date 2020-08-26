@@ -1,13 +1,16 @@
 # gitty - a simple alternative to git flow with less rigidity
 
+
 This project provides an easy way to deal with git branches in an environment with multiple parallel development streams.
 
-Some assumptions:
+<img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/gitty">
+
+### Some assumptions:
 
 - the `master` branch is the cutting edge of new development
 - release stabilization branches are created for each major and minor release
 - semantic versioning will be used to track where we are
-- projects are using either maven or nodejs 
+- projects are using either maven, python, or nodejs 
 
 # Some sample work flows...
 
@@ -28,47 +31,54 @@ Now, we have a blank project with a package.json file in it and nothing else.
 
 # current state of affairs (and some help)
 
-To see some useful info about your project, you can just run the gitty script.
+To see some useful info about your project, you can just run the gitty command.
 
-> NOTE: I made a symlink to `gitty.py` on my path and called it just `gitty`, so that's what the example will show.
+> I'm assuming that you installed gitty using pip from [https://pypi.org/project/gitty/](https://pypi.org/project/gitty/)
 
 ```shell script
-% gitty
-command: help
+-> % gitty
+$ git rev-parse --abbrev-ref HEAD
+current branch:  master
+project type:    node
+current version: 1.0.0
+command name:    help
 available commands on branch "master" are:
-  release     - create a new release stabilization branch and release candidate
-  task [name] - create a new task branch named "tasks/[name]"
-{
-    'current_branch': 'master', 'branch_parts': ['master'], 'task_prefix': 'tasks/', 'command': 'help', 
-    'project_file': 'package.json', 'current_version': '1.0.0', 'release_version': '1.0.0', 
-    'new_stabilization_branch': '1.0/master', 'new_release_branch': '1.0/release',  
-    'next_master_version': '1.1.0'
-}
+
+cleanup: ['c', 'clean']
+  # tidy up the local repository - remove obsolete branches
+  # make sure the git repo has no outstanding changes
+  $ git fetch --all --prune
+  $ git pull --rebase
+  # remove select local branches that have been merged to master
+...and a LOT more output here...
 ```
 
-This is telling you what gitty think the state of your project is.
+This is telling you what gitty thinks the state of your project is, and what you can do.
 
 # new release stabilization branch
 
-Let's say that we're ready to snap a 1.0.0 release of our project. Here's how to do that:
-
-> PROTIP: The "release" and "task" commands can be abbreviated to just "r" and "t", like this...
+Let's say that we're ready to snap a 1.0.0 release of our project. From the output above, you can see the "release" 
+command and it can be run using either `gitty release` or just `gitty r`:
 
 ```shell script
-% gitty r
-command: r
-command: release_from_master
+-> % gitty r
+$ git rev-parse --abbrev-ref HEAD
+current branch:  master
+project type:    node
+current version: 1.0.0
+command name:    r
 $ git checkout -b 1.0/master
 Switched to a new branch '1.0/master'
-$ git checkout -b 1.0/release
-Switched to a new branch '1.0/release'
+$ git checkout -b 1.0/releases
+Switched to a new branch '1.0/releases'
 bump version to 1.0.0
 $ git add package.json
 $ git commit -m "bumped version to 1.0.0"
+b'On branch 1.0/releases\nnothing to commit, working tree clean\n'
 $ git tag 1.0.0
 $ git checkout 1.0/master
 Switched to branch '1.0/master'
-$ git merge --strategy=ours 1.0/release
+$ git merge --strategy=ours 1.0/releases
 bump version to 1.0.1
 $ git add package.json
 $ git commit -m "bumped version to 1.0.1"
@@ -86,37 +96,40 @@ That's showing you what's happening when you create a release - why all that stu
 
 At the end of that, you'll be back on `master` and there will be 2 new branches:
 
-```
-% git branch
+```shell script
+-> % git branch
   1.0/master
-  1.0/release
+  1.0/releases
 * master
 ```
 
 Those branches have purpose.
 
-The `1.0/master` branch is used to stabilize the 1.0 release; The `1.0/release` branch is used to give us a stable point of reference in the future for things like hot fixes, etc.
+The `1.0/master` branch is used to stabilize the 1.0 release; The `1.0/releases` branch is used to give us a stable 
+point of reference in the future for things like hot fixes, etc.
 
 There's also a new tag:
 
-```
-% git tag
+```shell script
+-> % git tag
 1.0.0
 ```
 
-That is on the release branch, and specifically, on the commit where the release candidate should be built from.
+That is on the releases branch, and specifically, on the commit where the release candidate should be built from.
 
 # new task for forward development
 
 This is a common thing - so it's pretty simple:
 
-```
-% gcm
-% gitty t some_new_thing_here
-command: t
-make a new task branch
-command: task_from_master
+```shell script
+-> % gitty t some_new_thing_here
+$ git rev-parse --abbrev-ref HEAD
+current branch:  master
+project type:    node
+current version: 1.1.0
+command name:    t
 $ git checkout -b tasks/some_new_thing_here
+Switched to a new branch 'tasks/some_new_thing_here'
 ```
 
 Chuck some code here and commit it and push it - eventually, you'll merge it back to `master` and it'll be real code. Yay.
@@ -125,40 +138,45 @@ Chuck some code here and commit it and push it - eventually, you'll merge it bac
 
 Yeah, this doesn't sound like a great idea, but sometimes, it's needed.
 
-```
-% gco 1.0/master
+```shell script
+-> % gco 1.0/master
 Switched to branch '1.0/master'
-% gitty t some_new_task_for_10
-command: t
-make a new task branch
-command: task_from_point
+-> % gitty t some_new_task_for_10
+$ git rev-parse --abbrev-ref HEAD
+current branch:  1.0/master
+project type:    node
+current version: 1.0.1
+command name:    t
 $ git checkout -b 1.0/tasks/some_new_task_for_10
 Switched to a new branch '1.0/tasks/some_new_task_for_10'
 ```
 
-Now, you've created a branch from the `1.0/master` branch named `1.0/tasks/some_new_task_for_10` - the naming indicates where it will end up (although eventually, you'll most likely want to merge it to `master` too, for now, we'll just work on 1.0).
+Now, you've created a branch from the `1.0/master` branch named `1.0/tasks/some_new_task_for_10` - the naming indicates 
+where it will end up (although eventually, you'll most likely want to merge it to `master` too, for now, we'll just work on 1.0).
 
 # new release candidate for 1.0
 
 To make a new RC for the stabilization branch, do this:
 
-```
+```shell script
 % gco 1.0/master
-Switched to branch '1.0/master'
-% gitty r
-command: r
-command: release_from_point
-$ git checkout 1.0/release
-Switched to branch '1.0/release'
+-> % gitty r
+$ git rev-parse --abbrev-ref HEAD
+current branch:  1.0/master
+project type:    node
+current version: 1.0.1
+command name:    r
+$ git checkout 1.0/releases
+Switched to branch '1.0/releases'
 $ git merge 1.0/master
 bump version to 1.0.1
 $ git add package.json
 $ git commit -m "bumped version to 1.0.1"
-b'On branch 1.0/release\nnothing to commit, working tree clean\n'
+b'On branch 1.0/releases\nnothing to commit, working tree clean\n'
 $ git tag 1.0.1
 $ git checkout 1.0/master
 Switched to branch '1.0/master'
-$ git merge 1.0/release
+$ git merge 1.0/releases
 bump version to 1.0.2
 $ git add package.json
 $ git commit -m "bumped version to 1.0.2"
@@ -166,10 +184,8 @@ $ git commit -m "bumped version to 1.0.2"
 
 Again, that's a lot of output...but it's what's happening.
 
-> NOTE: if you want less (or more) output, you have the code. Look in the `def execute_command(command):` function 
-> for where most of the above output comes from.
-
-Now, the `1.0/master` branch got merged to `1.0/release`, we have a new tag for the release candidate (`1.0.1`), and the `1.0/master` project file reflects that we're now working toward `1.0.2` for the next release candidate.
+Now, the `1.0/master` branch got merged to `1.0/release`, we have a new tag for the release candidate (`1.0.1`), and 
+the `1.0/master` project file reflects that we're now working toward `1.0.2` for the next release candidate.
 
 > NOTE: Because we merge back to `1.0/master`, we have a single place to look for changes to be merged to version 1.1 (on `master`).
 
@@ -178,8 +194,6 @@ Now, the `1.0/master` branch got merged to `1.0/release`, we have a new tag for 
 Once release 1.0 has been released and we're ready to start on the road to 1.1 (and 1.2), we'll want to get all of the 1.0 changes merged back to `master` (where 1.1 lives). There's not much to do there, so we just use git:
 
 ```
-% gcm
-Switched to branch 'master'
 % git merge 1.0/master
 Auto-merging package.json
 CONFLICT (content): Merge conflict in package.json

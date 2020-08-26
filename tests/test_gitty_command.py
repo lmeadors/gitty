@@ -29,4 +29,4 @@ class TestCommand(TestCase):
             'current_branch': 'master'
         }
         command_setup(context)
-        print(context)
+        # print(context)

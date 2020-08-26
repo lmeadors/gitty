@@ -1,27 +1,27 @@
 import os
 import tempfile
 from shutil import copyfile
-from unittest import TestCase
-
-from gitty import GittyCommand
 from gitty.gitty_project_type_maven import GittyMaven
+from tests.test_gitty_project_type_base_test import ProjectTypeTestCase
 
 
-class TestGittyMaven(TestCase):
+class TestGittyMaven(ProjectTypeTestCase):
+
+    def __init__(self, test_method_name):
+        super().__init__(test_method_name)
+        self.sample_dir = 'sample_files/maven_snapshot'
 
     def test_is_not_in_use(self):
         gitty_maven = GittyMaven()
-        cwd = os.getcwd()
+        self.go_to_temp_dir()
         context = {}
         self.assertFalse(gitty_maven.is_in_use(context))
-        os.chdir(cwd)
         self.assertEqual('lol, nope', context.get('project_type_name', 'lol, nope'))
 
     def test_is_in_use_and_get_name(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_snapshot')
+        # save our location and go to the sample dir we need
+        cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
+
         maven = GittyMaven()
         context = {}
         self.assertTrue(maven.is_in_use(context))
@@ -31,11 +31,9 @@ class TestGittyMaven(TestCase):
         os.chdir(cwd)
 
     def test_get_version_info_from_the_master(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_snapshot')
-        maven = GittyMaven()
+        # save our location and go to the sample dir we need
+        cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
+
         expected = {
             'current_branch': 'master',
             'is_stable': False,
@@ -58,30 +56,17 @@ class TestGittyMaven(TestCase):
             'current_release_branch': None
         }
 
-        # init the context
-        context = {}
-        maven.is_in_use(context)
-        # we'll act as if this is on the master branch
-        GittyCommand.add_branch_info_to_context(context, 'master')
-        # print(context)
-        # add the project branch info
-        maven.get_version_info(context)
-        # print(context)
-
-        for key in context.keys():
-            # print(key)
-            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
-        self.assertEqual(len(expected), len(context))
+        # create the project and verify it is setting the context up as expected
+        self.check_project_type_version_info(expected, GittyMaven(), 'master')
 
         # go back where we started
         os.chdir(cwd)
 
     def test_get_version_info_from_stable_master(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_snapshot')
-        maven = GittyMaven()
+
+        # save our location and go to the sample dir we need
+        cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
+
         expected = {
             'current_branch': '1.0/master',
             'is_stable': True,
@@ -104,30 +89,17 @@ class TestGittyMaven(TestCase):
             'current_release_branch': '1.0/releases'
         }
 
-        # init the context
-        context = {}
-        maven.is_in_use(context)
-        # we'll act as if this is on the master branch
-        GittyCommand.add_branch_info_to_context(context, '1.0/master')
-        # print(context)
-        # add the project branch info
-        maven.get_version_info(context)
-        # print(context)
-
-        for key in context.keys():
-            # print(key)
-            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
-        self.assertEqual(len(expected), len(context))
+        # create the project and verify it is setting the context up as expected
+        self.check_project_type_version_info(expected, GittyMaven(), '1.0/master')
 
         # go back where we started
         os.chdir(cwd)
 
     def test_get_version_info_from_master_task(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_snapshot')
-        maven = GittyMaven()
+
+        # save our location and go to the sample dir we need
+        cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
+
         expected = {
             'project_type_name': 'maven',
             'current_branch': 'tasks/123_snapped_the_frame',
@@ -150,31 +122,16 @@ class TestGittyMaven(TestCase):
             'current_release_branch': None
         }
 
-        # init the context
-        context = {}
-        maven.is_in_use(context)
-        # we'll act as if this is on the master branch
-        GittyCommand.add_branch_info_to_context(context, 'tasks/123_snapped_the_frame')
-        # print(context)
-        # add the project branch info
-        maven.get_version_info(context)
-        # print(context)
-
-        for key in context.keys():
-            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
-        for key in expected.keys():
-            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
-        # self.assertEqual(len(expected), len(context))
+        self.check_project_type_version_info(expected, GittyMaven(), 'tasks/123_snapped_the_frame')
 
         # go back where we started
         os.chdir(cwd)
 
     def test_get_version_info_from_stable_task(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_snapshot')
-        maven = GittyMaven()
+
+        # save our location and go to the sample dir we need
+        cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
+
         expected = {
             'current_branch': '1.0/tasks/123_snapped_the_frame',
             'is_stable': True,
@@ -197,30 +154,16 @@ class TestGittyMaven(TestCase):
             'current_release_branch': '1.0/releases'
         }
 
-        # init the context
-        context = {}
-        maven.is_in_use(context)
-        # we'll act as if this is on the master branch
-        GittyCommand.add_branch_info_to_context(context, '1.0/tasks/123_snapped_the_frame')
-        # print(context)
-        # add the project branch info
-        maven.get_version_info(context)
-        # print(context)
-
-        for key in context.keys():
-            # print(key)
-            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
-        self.assertEqual(len(expected), len(context))
+        self.check_project_type_version_info(expected, GittyMaven(), '1.0/tasks/123_snapped_the_frame')
 
         # go back where we started
         os.chdir(cwd)
 
     def test_get_version_info_from_release_for_hotfix(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_release')
-        maven = GittyMaven()
+
+        # save our location and go to the sample dir we need
+        cwd = self.go_to_sample_dir('sample_files/maven_release')
+
         expected = {
             'current_branch': '1.2/releases',
             'is_stable': True,
@@ -243,38 +186,19 @@ class TestGittyMaven(TestCase):
             'current_release_branch': '1.2/releases'
         }
 
-        # init the context
-        context = {}
-        maven.is_in_use(context)
-        # we'll act as if this is on the master branch
-        GittyCommand.add_branch_info_to_context(context, '1.2/releases')
-        # print(context)
-        # add the project branch info
-        maven.get_version_info(context)
-        # print(context)
-
-        for key in context.keys():
-            # print(key)
-            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
-        self.assertEqual(len(expected), len(context))
+        self.check_project_type_version_info(expected, GittyMaven(), '1.2/releases')
 
         # go back where we started
         os.chdir(cwd)
 
     def test_bump_version(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_snapshot')
 
-        # copy the pom to a temp location first
-        temp_dir = tempfile.mkdtemp()
-        print(temp_dir)
-        pom_xml = 'pom.xml'
-        destination = '/'.join([temp_dir, pom_xml])
-        copyfile(pom_xml, destination)
-        os.chdir(temp_dir)
-        maven = GittyMaven()
+        # go to the sample directory
+        cwd = self.go_to_sample_dir()
+
+        # copy the pom to a temp location (and go there)
+        destination = self.copy_sample_to_temp_dir('pom.xml')
+
         context = {
             'dry_run': False,
             'branch_parts': ['master'],
@@ -282,32 +206,56 @@ class TestGittyMaven(TestCase):
             'is_stable': False,
         }
         new_version = '1.3.5-SNAPSHOT'
+
+        maven = GittyMaven()
+
+        # pre-check the version
+        maven.get_version_info(context)
+        self.assertEqual('1.0.0-SNAPSHOT', context['current_version'])
+
+        # update the version
         maven.bump_version_to(context, new_version)
+
+        # check the version after we bump it
         maven.get_version_info(context)
         self.assertEqual(new_version, context['current_version'])
+
+        # remove the copied project file
         os.remove(destination)
 
+        # go back where we started
+        os.chdir(cwd)
+
     def test_do_not_bump_version_if_dry_run(self):
-        # where are we?
-        cwd = os.path.dirname(__file__)
-        # from here, this is where the pom is...
-        os.chdir(cwd + '/sample_files/maven_snapshot')
+
+        cwd = self.go_to_sample_dir()
 
         # copy the pom to a temp location first
-        temp_dir = tempfile.mkdtemp()
-        pom_xml = 'pom.xml'
-        destination = '/'.join([temp_dir, pom_xml])
-        copyfile(pom_xml, destination)
-        os.chdir(temp_dir)
-        maven = GittyMaven()
+        destination = self.copy_sample_to_temp_dir('pom.xml')
+
         context = {
             'dry_run': True,
             'branch_parts': ['master'],
             'a_task': False,
             'is_stable': False,
         }
-        new_version = '1.3.5-SNAPSHOT'
-        maven.bump_version_to(context, new_version)
+
+        maven = GittyMaven()
+
+        # pre-check the version
         maven.get_version_info(context)
         self.assertEqual('1.0.0-SNAPSHOT', context['current_version'])
+
+        # set it...but not really - just a dry run...
+        new_version = '1.3.5-SNAPSHOT'
+        maven.bump_version_to(context, new_version)
+
+        # verify it did not change
+        maven.get_version_info(context)
+        self.assertEqual('1.0.0-SNAPSHOT', context['current_version'])
+
+        # clean up the mess
         os.remove(destination)
+
+        # go back where we started
+        os.chdir(cwd)
