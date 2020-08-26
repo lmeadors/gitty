@@ -29,15 +29,29 @@ class GittyNode(GittyProjectType):
             context['current_version'] = data['version']
             context['release_version'] = data['version']
             release_version_split = context['release_version'].split(".")
-            context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
-            context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
-            context['current_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
+
+            if context['is_stable']:
+                context['current_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
+                if context['a_task']:
+                    context['new_release_branch'] = None
+                    context['new_stabilization_branch'] = None
+                    context['new_stabilization_version'] = None
+                else:
+                    context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
+                    context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
+                    context['new_stabilization_version'] = '.'.join(release_version_split) + '.0'
+            else:
+                context['current_release_branch'] = None
+                if context['a_task']:
+                    context['new_release_branch'] = None
+                    context['new_stabilization_branch'] = None
+                    context['new_stabilization_version'] = None
+                else:
+                    context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
+                    context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/master'
+                    context['new_stabilization_version'] = '.'.join(release_version_split)
+
             # increment the patch
-            context['next_stable_version'] = '.'.join([
-                release_version_split[0],
-                release_version_split[1],
-                str(int(release_version_split[2]) + 1),
-            ])
             next_min = str(int(release_version_split[1]) + 1)
             context['next_master_version'] = '.'.join([
                 release_version_split[0],
@@ -48,7 +62,6 @@ class GittyNode(GittyProjectType):
             next_stable_version = release_version_split.copy()
             next_stable_version[-1] = str(int(next_stable_version[-1]) + 1)
             context['next_stable_version'] = '.'.join(next_stable_version)
-            context['new_stabilization_version'] = '.'.join(release_version_split) + '.0'
 
     def bump_version_to(self, context, new_version):
         print('bump version to {}'.format(new_version))

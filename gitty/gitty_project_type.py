@@ -33,11 +33,15 @@ class GittyUnknownProjectType(GittyProjectType):
         from gitty import Color
         print(Color.red_lt('unable to get version info for unknown project type'))
         for key in [
+            'current_release_branch',
             'current_version',
+            'hotfix',
+            'new_release_branch',
+            'new_stabilization_branch',
             'new_stabilization_version',
             'next_master_version',
             'next_stable_version',
-            'release_version'
+            'release_version',
         ]:
             context[key] = None
 
