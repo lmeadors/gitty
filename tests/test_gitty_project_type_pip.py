@@ -12,7 +12,7 @@ class TestGittyPip(TestCase):
         temp_dir = tempfile.gettempdir()
         os.chdir(temp_dir)
         cwd = os.getcwd()
-        print('cwd: ' + cwd)
+        # print('cwd: ' + cwd)
         context = {}
         pip = GittyPip()
         self.assertFalse(pip.is_in_use(context))
@@ -67,7 +67,7 @@ class TestGittyPip(TestCase):
         pip.is_in_use(context)
         GittyCommand.add_branch_info_to_context(context, 'master')
         pip.get_version_info(context)
-        print(context)
+        # print(context)
         for key in context.keys():
             # print(key)
             self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
