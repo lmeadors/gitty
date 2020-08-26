@@ -3,6 +3,8 @@
 
 This project provides an easy way to deal with git branches in an environment with multiple parallel development streams.
 
+View download stats here: https://pypistats.org/packages/gitty
+
 <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/gitty">
 
 ### Some assumptions:
@@ -193,7 +195,7 @@ the `1.0/master` project file reflects that we're now working toward `1.0.2` for
 
 Once release 1.0 has been released and we're ready to start on the road to 1.1 (and 1.2), we'll want to get all of the 1.0 changes merged back to `master` (where 1.1 lives). There's not much to do there, so we just use git:
 
-```
+```shell script
 % git merge 1.0/master
 Auto-merging package.json
 CONFLICT (content): Merge conflict in package.json
@@ -205,7 +207,7 @@ Automatic merge failed; fix conflicts and then commit the result.
 
 Creating the next release is exactly the same as before:
 
-```
+```shell script
 % gcm
 % gitty r
 ```
