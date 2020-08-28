@@ -17,6 +17,13 @@ class GitAPI:
         )
         return current_branch.decode().strip()
 
+    def get_tags_on_commit(self, context):
+        tags = self.command_executor.execute_immutable_command(
+            context,
+            'git tag --points-at HEAD'.split()
+        )
+        return tags.split()
+
     def commit(self, context, message):
         command_parts = [
             'git',

@@ -12,18 +12,19 @@ class TestGittyNode(ProjectTypeTestCase):
         self.sample_dir = 'sample_files/node'
 
     def test_is_not_in_use(self):
-        self.go_to_temp_dir()
+        cwd = self.go_to_temp_dir()
         context = {}
-        pip = GittyNode()
-        self.assertFalse(pip.is_in_use(context))
+        project = GittyNode()
+        self.assertFalse(project.is_in_use(context))
         self.assertEqual('lol, nope', context.get('project_type_name', 'lol, nope'))
+        os.chdir(cwd)
 
     def test_is_in_use_and_get_name(self):
         cwd = self.go_to_sample_dir()
-        pip = GittyNode()
+        project = GittyNode()
         context = {}
-        self.assertTrue(pip.is_in_use(context))
-        self.assertEqual(pip.get_name(), context['project_type_name'])
+        self.assertTrue(project.is_in_use(context))
+        self.assertEqual(project.get_name(), context['project_type_name'])
 
         # go back where we started
         os.chdir(cwd)
@@ -54,16 +55,8 @@ class TestGittyNode(ProjectTypeTestCase):
             'next_stable_version': '1.2.5'
         }
 
-        context = {}
-        pip = GittyNode()
-        pip.is_in_use(context)
-        GittyCommand.add_branch_info_to_context(context, 'master')
-        pip.get_version_info(context)
-        # print(context)
-        for key in context.keys():
-            # print(key)
-            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
-        self.assertEqual(len(expected), len(context))
+        # create the project and verify it is setting the context up as expected
+        self.check_project_type_version_info(expected, GittyNode(), 'master')
 
         # go back where we started
         os.chdir(cwd)
@@ -95,16 +88,8 @@ class TestGittyNode(ProjectTypeTestCase):
             'hotfix': True,
         }
 
-        context = {}
-        pip = GittyNode()
-        pip.is_in_use(context)
-        GittyCommand.add_branch_info_to_context(context, '1.2/master')
-        pip.get_version_info(context)
-
-        for key in context.keys():
-            # print(key)
-            self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))
-        self.assertEqual(len(expected), len(context))
+        # create the project and verify it is setting the context up as expected
+        self.check_project_type_version_info(expected, GittyNode(), '1.2/master')
 
         # go back where we started
         os.chdir(cwd)

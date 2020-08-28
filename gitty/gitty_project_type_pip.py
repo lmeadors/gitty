@@ -29,8 +29,13 @@ class GittyPip(GittyProjectType):
         stable_branch_version = '.'.join(
             current_version_split[:-1]
         )
-        context['new_stabilization_branch'] = stable_branch_version + '/master'
-        context['new_release_branch'] = stable_branch_version + '/releases'
+        if context['is_stable']:
+            context['new_stabilization_branch'] = current_version + '/master'
+            context['new_release_branch'] = current_version + '/releases'
+            context['new_stabilization_version'] = current_version + '.0'
+        else:
+            context['new_stabilization_branch'] = stable_branch_version + '/master'
+            context['new_release_branch'] = stable_branch_version + '/releases'
 
         next_master_version = '.'.join([
             current_version_split[0],
@@ -50,8 +55,6 @@ class GittyPip(GittyProjectType):
             context['current_release_branch'] = stable_branch_version + '/releases'
         else:
             context['current_release_branch'] = None
-
-        context['new_stabilization_version'] = 'unknown'
 
     def bump_version_to(self, context, new_version):
         # we need to read in the setup.py file and replace the
