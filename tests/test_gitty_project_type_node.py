@@ -21,6 +21,7 @@ class TestGittyNode(ProjectTypeTestCase):
 
     def test_is_in_use_and_get_name(self):
         cwd = self.go_to_sample_dir()
+
         project = GittyNode()
         context = {}
         self.assertTrue(project.is_in_use(context))
@@ -35,25 +36,30 @@ class TestGittyNode(ProjectTypeTestCase):
 
         expected = {
             'project_type_name': 'node',
-            'current_release_branch': None,
-            'new_stabilization_version': '1.2.4',
-            'current_branch': 'master',
-            'the_master': True,
+            'project_file': 'package.json',
+
+            'current_version': '1.2.4',
+            'release_version': '1.2.4',
+            'next_stable_version': '1.2.5',
+            'next_master_version': '1.3.0',
+
             'branch_parts': ['master'],
+            'current_branch': 'master',
+            'current_release_branch': None,
+            'task_prefix': 'tasks/',
+
+            'new_release_branch': '1.2/releases',
+            'new_stabilization_branch': '1.2/master',
+            'new_stabilization_version': '1.2.4',
+
+            'the_master': True,
             'a_master': True,
             'a_task': False,
             'a_release': False,
-            'task_prefix': 'tasks/',
             'is_stable': False,
-            'project_file': 'package.json',
             'hotfix': False,
-            'current_version': '1.2.4',
-            'release_version': '1.2.4',
             'tags_on_commit': [],
-            'new_stabilization_branch': '1.2/master',
-            'new_release_branch': '1.2/releases',
-            'next_master_version': '1.3.0',
-            'next_stable_version': '1.2.5'
+
         }
 
         # create the project and verify it is setting the context up as expected

@@ -12,20 +12,20 @@ class TestGittyMaven(ProjectTypeTestCase):
         self.sample_dir = 'sample_files/maven_snapshot'
 
     def test_is_not_in_use(self):
-        gitty_maven = GittyMaven()
-        self.go_to_temp_dir()
+        cwd = self.go_to_temp_dir()
         context = {}
-        self.assertFalse(gitty_maven.is_in_use(context))
+        project = GittyMaven()
+        self.assertFalse(project.is_in_use(context))
         self.assertEqual('lol, nope', context.get('project_type_name', 'lol, nope'))
+        os.chdir(cwd)
 
     def test_is_in_use_and_get_name(self):
-        # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
 
-        maven = GittyMaven()
+        project = GittyMaven()
         context = {}
-        self.assertTrue(maven.is_in_use(context))
-        self.assertEqual(maven.get_name(), context['project_type_name'])
+        self.assertTrue(project.is_in_use(context))
+        self.assertEqual(project.get_name(), context['project_type_name'])
 
         # go back where we started
         os.chdir(cwd)
@@ -35,26 +35,31 @@ class TestGittyMaven(ProjectTypeTestCase):
         cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
 
         expected = {
-            'current_branch': 'master',
-            'is_stable': False,
-            'tags_on_commit': [],
-            'branch_parts': ['master'],
             'project_type_name': 'maven',
             'project_file': 'pom.xml',
+
             'current_version': '1.0.0-SNAPSHOT',
-            'hotfix': False,
             'release_version': '1.0.0',
-            'new_stabilization_branch': '1.0/master',
-            'new_release_branch': '1.0/releases',
-            'new_stabilization_version': '1.0.0-SNAPSHOT',
             'next_stable_version': '1.0.1-SNAPSHOT',
             'next_master_version': '1.1.0-SNAPSHOT',
+
+            'branch_parts': ['master'],
+            'current_branch': 'master',
+            'current_release_branch': None,
+            'task_prefix': 'tasks/',
+
+            'new_release_branch': '1.0/releases',
+            'new_stabilization_branch': '1.0/master',
+            'new_stabilization_version': '1.0.0-SNAPSHOT',
+
             'the_master': True,
             'a_master': True,
             'a_task': False,
             'a_release': False,
-            'task_prefix': 'tasks/',
-            'current_release_branch': None
+            'is_stable': False,
+            'hotfix': False,
+            'tags_on_commit': [],
+
         }
 
         # create the project and verify it is setting the context up as expected

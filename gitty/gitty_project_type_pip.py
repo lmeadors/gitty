@@ -36,6 +36,10 @@ class GittyPip(GittyProjectType):
         else:
             context['new_stabilization_branch'] = stable_branch_version + '/master'
             context['new_release_branch'] = stable_branch_version + '/releases'
+            if context['the_master']:
+                context['new_stabilization_version'] = current_version
+            else:
+                context['new_stabilization_version'] = None
 
         next_master_version = '.'.join([
             current_version_split[0],
