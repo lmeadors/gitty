@@ -34,6 +34,38 @@ class GitAPI:
         self.command_executor.execute_command(context, command_parts)
         return
 
+    def status_is_clean(self):
+        return
+
+    def get_merged_branch_names(self):
+        return []
+
+    def remove_branch(self):
+        return
+
+    def fetch_and_prune(self):
+        return
+
+    def pull_and_rebase(self):
+        return
+
+    def checkout_existing(self):
+        return
+
+    def checkout_new(self):
+        return
+
+    def merge(self):
+        return
+
+    def merge_ours(self):
+        return
+
+    def tag(self):
+        return
+
+    def add(self):
+        return
 
 class CommandExecutor:
 

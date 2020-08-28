@@ -337,6 +337,7 @@ class CommentStep(CommandStep):
 
 
 class GitCommandStep(CommandStep):
+    # todo: migrate this to use the new git api in the context
     def __init__(self, cmd_template, context_entry_names):
         self.cmd_template = cmd_template
         self.context_entry_names = context_entry_names
@@ -361,6 +362,7 @@ class GitCommandStep(CommandStep):
 
 # this one is a bit different - sometimes we need to specify the command as an array instead of just a string
 class GitCommandBump(CommandStep):
+    # todo: migrate this to use the new git api in the context
     def __init__(self, version_name):
         self.version_name = version_name
         self.command_parts = [

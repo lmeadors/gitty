@@ -1,8 +1,5 @@
 import os
-import tempfile
-from unittest import TestCase
 
-from gitty import GittyCommand
 from gitty.gitty_project_type_pip import GittyPip
 from tests.test_gitty_project_type_base_test import ProjectTypeTestCase
 

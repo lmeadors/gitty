@@ -4,6 +4,7 @@ from gitty import GittyCommand, GitCommandStep, CommentStep
 
 
 class GittyTask(GittyCommand):
+    # todo: migrate this to use the new git api in the context
     _title = 'task'
     _name = 'start a new task branch (name is required)'
     _bindings = ['t', 'task']

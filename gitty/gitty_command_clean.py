@@ -6,6 +6,7 @@ class GitStatusCheckStep(CommandStep):
         return ['# make sure the git repo has no outstanding changes']
 
     def execute(self, context):
+        # todo: migrate this to use the new git api in the context: status_is_clean()
         # set context['continue'] = False if we don't want to continue
         response = GittyCommand.execute_command_safe(context, 'git status -s'.split())
         if response:
@@ -20,6 +21,7 @@ class GitCleanStep(CommandStep):
         return ['# remove select local branches that have been merged to {}'.format(context['current_branch'])]
 
     def execute(self, context):
+        # todo: migrate this to use the new git api in the context: get_merged_branch_names()
         command_output = GittyCommand.execute_command_safe(context, 'git branch --no-color --merged'.split())
         output_decoded = command_output.decode('utf-8')
         output_lines = output_decoded.splitlines()
@@ -35,6 +37,7 @@ class GitCleanStep(CommandStep):
                 retain_reason = 'current branch is preserved'
 
             if not retain_reason:
+                # todo: migrate this to use the new git api in the context: remove_branch()
                 GittyCommand.execute_command(context, 'git branch -d {}'.format(branch_name).split())
             else:
                 print('leaving branch "{}" ({})'.format(branch_name, retain_reason))
@@ -47,7 +50,9 @@ class GittyClean(GittyCommand):
     _steps = [
         CommentStep('tidy up the local repository - remove obsolete branches', []),
         GitStatusCheckStep(),
+        # todo: migrate this to use the new git api in the context: fetch_and_prune()
         GitCommandStep('git fetch --all --prune', []),
+        # todo: migrate this to use the new git api in the context: pull_and_rebase()
         GitCommandStep('git pull --rebase', []),
         GitCleanStep()
     ]
