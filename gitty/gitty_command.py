@@ -102,6 +102,9 @@ class GittyCommand:
     @staticmethod
     def add_branch_info_to_context(context, current_branch):
 
+        # is this commit tagged? if so, this could be a hotfix
+        context['tags_on_commit'] = context['git_api'].get_tags_on_commit(context)
+
         # split the branch name into its components
         branch_parts = current_branch.split("/")
 

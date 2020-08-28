@@ -30,9 +30,14 @@ class ProjectTypeTestCase(TestCase):
         os.chdir(temp_dir)
         return cwd
 
-    def check_project_type_version_info(self, expected, project, current_branch):
+    def check_project_type_version_info(self, expected, project, current_branch, tags=[]):
+        class TestGitApi:
+            def get_tags_on_commit(self, context):
+                return tags
 
-        context = {}
+        context = {
+            'git_api': TestGitApi()
+        }
         self.assertTrue(project.is_in_use(context), 'expected to be using project type {}'.format(project.get_name()))
 
         GittyCommand.add_branch_info_to_context(context, current_branch)
@@ -40,7 +45,8 @@ class ProjectTypeTestCase(TestCase):
         # add the project branch info
         project.get_version_info(context)
 
-        # verify that the actual results match what we expected
+        # verify that the actual results match what we expected - less the git api we added
+        del context['git_api']
         for key in context.keys():
             # print(key)
             self.assertEqual(expected[key], context[key], 'assertion on {} failed'.format(key))

@@ -54,7 +54,8 @@ class TestGittyPip(ProjectTypeTestCase):
             'new_stabilization_branch': '1.1/master',
             'new_release_branch': '1.1/releases',
             'next_master_version': '1.2.0',
-            'next_stable_version': '1.1.3'
+            'next_stable_version': '1.1.3',
+            'tags_on_commit': []
         }
 
         # create the project and verify it is setting the context up as expected
@@ -64,7 +65,6 @@ class TestGittyPip(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_get_version_info_on_stable(self):
-
         # go to the sample directory
         cwd = self.go_to_sample_dir()
 
@@ -87,7 +87,8 @@ class TestGittyPip(ProjectTypeTestCase):
             'new_stabilization_branch': '1.1.2/master',
             'new_release_branch': '1.1.2/releases',
             'next_master_version': '1.2.0',
-            'next_stable_version': '1.1.3'
+            'next_stable_version': '1.1.3',
+            'tags_on_commit': []
         }
 
         # create the project and verify it is setting the context up as expected
@@ -97,7 +98,6 @@ class TestGittyPip(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_get_version_info_from_master_task(self):
-
         # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir()
 
@@ -120,7 +120,8 @@ class TestGittyPip(ProjectTypeTestCase):
             'a_task': True,
             'a_release': False,
             'task_prefix': None,
-            'current_release_branch': '1.1/releases'
+            'current_release_branch': '1.1/releases',
+            'tags_on_commit': []
         }
 
         self.check_project_type_version_info(expected, GittyPip(), 'tasks/123_snapped_the_frame')
@@ -129,7 +130,6 @@ class TestGittyPip(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_get_version_info_from_stable_task(self):
-
         # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir()
 
@@ -152,7 +152,8 @@ class TestGittyPip(ProjectTypeTestCase):
             'a_task': True,
             'a_release': False,
             'task_prefix': None,
-            'current_release_branch': '1.1/releases'
+            'current_release_branch': '1.1/releases',
+            'tags_on_commit': []
         }
 
         self.check_project_type_version_info(expected, GittyPip(), '1.2/tasks/123_snapped_the_frame')
@@ -161,10 +162,10 @@ class TestGittyPip(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_get_version_info_from_release_for_hotfix(self):
-
         # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir()
 
+        tags = ['1.1.2']
         expected = {
             'current_branch': '1.1/releases',
             'is_stable': True,
@@ -172,7 +173,7 @@ class TestGittyPip(ProjectTypeTestCase):
             'project_type_name': 'pip',
             'project_file': 'setup.py',
             'current_version': '1.1.2',
-            'hotfix': False,
+            'hotfix': True,
             'release_version': '1.1.2',
             'new_stabilization_branch': '1.1.2/master',
             'new_release_branch': '1.1.2/releases',
@@ -184,10 +185,11 @@ class TestGittyPip(ProjectTypeTestCase):
             'a_task': False,
             'a_release': True,
             'task_prefix': None,
-            'current_release_branch': '1.1/releases'
+            'current_release_branch': '1.1/releases',
+            'tags_on_commit': tags
         }
 
-        self.check_project_type_version_info(expected, GittyPip(), '1.1/releases')
+        self.check_project_type_version_info(expected, GittyPip(), '1.1/releases', tags)
 
         # go back where we started
         os.chdir(cwd)

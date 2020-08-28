@@ -46,9 +46,10 @@ class TestGittyNode(ProjectTypeTestCase):
             'task_prefix': 'tasks/',
             'is_stable': False,
             'project_file': 'package.json',
-            'hotfix': True,
+            'hotfix': False,
             'current_version': '1.2.4',
             'release_version': '1.2.4',
+            'tags_on_commit': [],
             'new_stabilization_branch': '1.2/master',
             'new_release_branch': '1.2/releases',
             'next_master_version': '1.3.0',
@@ -70,6 +71,7 @@ class TestGittyNode(ProjectTypeTestCase):
             'project_type_name': 'node',
             'project_file': 'package.json',
             'current_version': '1.2.4',
+            'tags_on_commit': [],
             'release_version': '1.2.4',
             'current_branch': '1.2/master',
             'branch_parts': ['1.2', 'master'],
@@ -85,7 +87,7 @@ class TestGittyNode(ProjectTypeTestCase):
             'a_task': False,
             'a_release': False,
             'is_stable': True,
-            'hotfix': True,
+            'hotfix': False,
         }
 
         # create the project and verify it is setting the context up as expected
@@ -102,11 +104,12 @@ class TestGittyNode(ProjectTypeTestCase):
         expected = {
             'project_type_name': 'node',
             'project_file': 'package.json',
+            'tags_on_commit': [],
             'current_version': '1.2.4',
             'current_branch': 'tasks/123_snapped_the_frame',
             'is_stable': False,
             'branch_parts': ['tasks', '123_snapped_the_frame'],
-            'hotfix': True,
+            'hotfix': False,
             'release_version': '1.2.4',
             'new_stabilization_branch': None,
             'new_release_branch': None,
@@ -138,7 +141,8 @@ class TestGittyNode(ProjectTypeTestCase):
             'project_type_name': 'node',
             'project_file': 'package.json',
             'current_version': '1.2.4',
-            'hotfix': True,
+            'tags_on_commit': [],
+            'hotfix': False,
             'release_version': '1.2.4',
             'new_stabilization_branch': None,
             'new_release_branch': None,
@@ -163,6 +167,7 @@ class TestGittyNode(ProjectTypeTestCase):
         # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir()
 
+        tags = ['1.2.4']
         expected = {
             'current_branch': '1.2/releases',
             'is_stable': True,
@@ -170,6 +175,7 @@ class TestGittyNode(ProjectTypeTestCase):
             'project_type_name': 'node',
             'project_file': 'package.json',
             'current_version': '1.2.4',
+            'tags_on_commit': tags,
             'hotfix': True,
             'release_version': '1.2.4',
             'new_stabilization_branch': '1.2.4/master',
@@ -185,7 +191,7 @@ class TestGittyNode(ProjectTypeTestCase):
             'current_release_branch': '1.2/releases'
         }
 
-        self.check_project_type_version_info(expected, GittyNode(), '1.2/releases')
+        self.check_project_type_version_info(expected, GittyNode(), '1.2/releases', tags)
 
         # go back where we started
         os.chdir(cwd)
@@ -204,6 +210,7 @@ class TestGittyNode(ProjectTypeTestCase):
             'branch_parts': ['master'],
             'a_task': False,
             'is_stable': False,
+            'tags_on_commit': [],
         }
         new_version = '1.3.5'
 
@@ -239,6 +246,7 @@ class TestGittyNode(ProjectTypeTestCase):
             'branch_parts': ['master'],
             'a_task': False,
             'is_stable': False,
+            'tags_on_commit': [],
         }
 
         project = GittyNode()

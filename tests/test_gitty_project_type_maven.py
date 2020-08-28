@@ -37,6 +37,7 @@ class TestGittyMaven(ProjectTypeTestCase):
         expected = {
             'current_branch': 'master',
             'is_stable': False,
+            'tags_on_commit': [],
             'branch_parts': ['master'],
             'project_type_name': 'maven',
             'project_file': 'pom.xml',
@@ -70,6 +71,7 @@ class TestGittyMaven(ProjectTypeTestCase):
         expected = {
             'current_branch': '1.0/master',
             'is_stable': True,
+            'tags_on_commit': [],
             'branch_parts': ['1.0', 'master'],
             'project_file': 'pom.xml',
             'project_type_name': 'maven',
@@ -103,6 +105,7 @@ class TestGittyMaven(ProjectTypeTestCase):
         expected = {
             'project_type_name': 'maven',
             'current_branch': 'tasks/123_snapped_the_frame',
+            'tags_on_commit': [],
             'is_stable': False,
             'branch_parts': ['tasks', '123_snapped_the_frame'],
             'project_file': 'pom.xml',
@@ -135,6 +138,7 @@ class TestGittyMaven(ProjectTypeTestCase):
         expected = {
             'current_branch': '1.0/tasks/123_snapped_the_frame',
             'is_stable': True,
+            'tags_on_commit': [],
             'branch_parts': ['1.0', 'tasks', '123_snapped_the_frame'],
             'project_type_name': 'maven',
             'project_file': 'pom.xml',
@@ -164,9 +168,11 @@ class TestGittyMaven(ProjectTypeTestCase):
         # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir('sample_files/maven_release')
 
+        tags = ['1.2.3']
         expected = {
             'current_branch': '1.2/releases',
             'is_stable': True,
+            'tags_on_commit': tags,
             'branch_parts': ['1.2', 'releases'],
             'project_type_name': 'maven',
             'project_file': 'pom.xml',
@@ -186,7 +192,7 @@ class TestGittyMaven(ProjectTypeTestCase):
             'current_release_branch': '1.2/releases'
         }
 
-        self.check_project_type_version_info(expected, GittyMaven(), '1.2/releases')
+        self.check_project_type_version_info(expected, GittyMaven(), '1.2/releases', tags)
 
         # go back where we started
         os.chdir(cwd)
@@ -204,6 +210,7 @@ class TestGittyMaven(ProjectTypeTestCase):
             'branch_parts': ['master'],
             'a_task': False,
             'is_stable': False,
+            'tags_on_commit': [],
         }
         new_version = '1.3.5-SNAPSHOT'
 
@@ -238,6 +245,7 @@ class TestGittyMaven(ProjectTypeTestCase):
             'branch_parts': ['master'],
             'a_task': False,
             'is_stable': False,
+            'tags_on_commit': [],
         }
 
         maven = GittyMaven()

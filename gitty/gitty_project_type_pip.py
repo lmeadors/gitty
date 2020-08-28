@@ -21,7 +21,7 @@ class GittyPip(GittyProjectType):
 
         current_version = setup.metadata.version
 
-        context['hotfix'] = False
+        context['hotfix'] = current_version in context['tags_on_commit']
         context['current_version'] = current_version
         context['release_version'] = current_version
 

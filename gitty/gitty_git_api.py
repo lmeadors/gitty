@@ -22,7 +22,7 @@ class GitAPI:
             context,
             'git tag --points-at HEAD'.split()
         )
-        return tags.split()
+        return tags.decode().split()
 
     def commit(self, context, message):
         command_parts = [
