@@ -31,41 +31,59 @@ class GitAPI:
             '-m',
             message
         ]
-        self.command_executor.execute_command(context, command_parts)
-        return
+        return self.command_executor.execute_command(context, command_parts)
 
-    def status_is_clean(self):
-        return
+    def status_is_clean(self, context):
+        status = self.command_executor.execute_immutable_command(context, 'git status -s'.split()).decode()
+        return status == ''
 
-    def get_merged_branch_names(self):
-        return []
+    def get_merged_branch_names(self, context):
+        merged_branches = self.command_executor.execute_immutable_command(
+            context,
+            'git branch --no-color --merged'.split()
+        ).decode()
+        return merged_branches
 
-    def remove_branch(self):
-        return
+    def get_unmerged_branch_names(self, context):
+        unmerged_branches = self.command_executor.execute_immutable_command(
+            context,
+            'git branch --no-color --no-merged'.split()
+        ).decode()
+        return unmerged_branches
 
-    def fetch_and_prune(self):
-        return
+    def remove_branch(self, context, branch_name):
+        return self.command_executor.execute_command(context, 'git branch -d {}'.format(branch_name).split())
 
-    def pull_and_rebase(self):
-        return
+    def checkout_existing(self, context, branch_name):
+        return self.command_executor.execute_command(context, 'git checkout {}'.format(branch_name).split())
 
-    def checkout_existing(self):
-        return
+    def checkout_new(self, context, branch_name):
+        return self.command_executor.execute_command(context, 'git checkout -b {}'.format(branch_name).split())
 
-    def checkout_new(self):
-        return
+    def merge(self, context, branch_to_merge):
+        return self.command_executor.execute_command(
+            context,
+            'git merge {}'.format(branch_to_merge).split()
+        )
 
-    def merge(self):
-        return
+    def merge_ours(self, context, branch_to_merge):
+        return self.command_executor.execute_command(
+            context,
+            'git merge --strategy=ours {}'.format(branch_to_merge).split()
+        )
 
-    def merge_ours(self):
-        return
+    def tag(self, context, tag):
+        return self.command_executor.execute_command(context, 'git tag {}'.format(tag).split())
 
-    def tag(self):
-        return
+    def add(self, context, file_to_add):
+        return self.command_executor.execute_command(context, 'git add {}'.format(file_to_add).split())
 
-    def add(self):
-        return
+    def fetch_and_prune(self, context):
+        return self.command_executor.execute_command(context, 'git fetch --all --prune'.split())
+
+    def pull_and_rebase(self, context):
+        return self.command_executor.execute_command(context, 'git pull --rebase'.split())
+
 
 class CommandExecutor:
 
