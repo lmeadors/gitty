@@ -13,7 +13,9 @@ class TestGitAPI(TestCase):
         self.git = GitAPI(self.executor)
 
     def test_git_operations(self):
-        context = {}
+        context = {
+            'dry_run': False
+        }
         cwd = os.path.dirname(__file__)
         git_repo = self.create_new_git_repo()
         # git_repo = self.create_new_git_repo('/Users/lmeadors/projects/elm/git-api-test/test_repo')

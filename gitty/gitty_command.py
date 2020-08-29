@@ -19,9 +19,10 @@ def command_setup(context):
     from .gitty_git_api import GitAPI
     from .gitty_git_api import CommandExecutor
 
-    # set up the git API
-    context['executor'] = CommandExecutor()
-    context['git_api'] = GitAPI(context["executor"])
+    # set up the git API if it's missing
+    if not context['git_api']:
+        context['executor'] = CommandExecutor()
+        context['git_api'] = GitAPI(context["executor"])
 
     # register the available commands
     context["commands"] = [

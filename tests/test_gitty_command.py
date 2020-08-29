@@ -3,6 +3,14 @@ from unittest import TestCase
 from gitty import command_setup
 
 
+class MockGitApi:
+    def get_current_branch(self, context):
+        return 'master'
+
+    def get_tags_on_commit(self, context):
+        return []
+
+
 class TestCommand(TestCase):
 
     def test_setup(self):
@@ -26,7 +34,8 @@ class TestCommand(TestCase):
         }
 
         context = {
-            'current_branch': 'master'
+            'current_branch': 'master',
+            'git_api': MockGitApi()
         }
         command_setup(context)
         # print(context)

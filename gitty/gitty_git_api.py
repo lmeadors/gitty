@@ -90,11 +90,12 @@ class CommandExecutor:
     def __init__(self, dry_run=False):
         self.dry_run = dry_run
 
-    def execute_command(self, context, command_parts, raise_error=False):
+    def execute_command(self, context, command_parts, raise_error=False, dry_run=False):
+        # if either of these is true, it's a dry run which means don't change anything
+        dry_run = self.dry_run or dry_run
         # show the command to be run
         print('$', ' '.join(command_parts))
-
-        if not self.dry_run:
+        if not dry_run:
             try:
                 return subprocess.check_output(command_parts)
             except subprocess.CalledProcessError as e:
@@ -103,13 +104,14 @@ class CommandExecutor:
                     raise e
 
     # noinspection PyMethodMayBeStatic
-    def execute_immutable_command(self, context, command_parts, raise_error=False):
+    def execute_immutable_command(self, context, command_parts, raise_error=False, dry_run=False):
+        return self.execute_command(context, command_parts, raise_error, dry_run)
         # show the command to be run
-        print('$', ' '.join(command_parts))
-
-        try:
-            return subprocess.check_output(command_parts)
-        except subprocess.CalledProcessError as e:
-            print(Color.red_lt(e.output.decode()))
-            if raise_error:
-                raise e
+        # print('$', ' '.join(command_parts))
+        #
+        # try:
+        #     return subprocess.check_output(command_parts)
+        # except subprocess.CalledProcessError as e:
+        #     print(Color.red_lt(e.output.decode()))
+        #     if raise_error:
+        #         raise e
