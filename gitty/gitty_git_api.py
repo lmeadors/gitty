@@ -1,7 +1,5 @@
 import subprocess
 
-from gitty import Color
-
 
 class GitAPI:
 
@@ -57,8 +55,10 @@ class GitAPI:
     def checkout_existing(self, context, branch_name):
         return self.command_executor.execute_command(context, 'git checkout {}'.format(branch_name).split())
 
-    def checkout_new(self, context, branch_name):
-        return self.command_executor.execute_command(context, 'git checkout -b {}'.format(branch_name).split())
+    def checkout_new(self, context, branch_name, executor=None):
+        if executor is None:
+            executor = self.command_executor
+        return executor.execute_command(context, 'git checkout -b {}'.format(branch_name).split())
 
     def merge(self, context, branch_to_merge):
         return self.command_executor.execute_command(
@@ -85,6 +85,16 @@ class GitAPI:
         return self.command_executor.execute_command(context, 'git pull --rebase'.split())
 
 
+class DescribeExecutor:
+
+    def execute_command(self, context, command_parts, raise_error=False, dry_run=False):
+        response = ' '.join(command_parts)
+        return [response]
+
+    def execute_immutable_command(self, context, command_parts, raise_error=False, dry_run=False):
+        return self.execute_command(context, command_parts, False, False)
+
+
 class CommandExecutor:
 
     def __init__(self, dry_run=False):
@@ -99,6 +109,7 @@ class CommandExecutor:
             try:
                 return subprocess.check_output(command_parts)
             except subprocess.CalledProcessError as e:
+                from gitty import Color
                 print(Color.red_lt(e.output.decode()))
                 if raise_error:
                     raise e
@@ -106,12 +117,3 @@ class CommandExecutor:
     # noinspection PyMethodMayBeStatic
     def execute_immutable_command(self, context, command_parts, raise_error=False, dry_run=False):
         return self.execute_command(context, command_parts, raise_error, dry_run)
-        # show the command to be run
-        # print('$', ' '.join(command_parts))
-        #
-        # try:
-        #     return subprocess.check_output(command_parts)
-        # except subprocess.CalledProcessError as e:
-        #     print(Color.red_lt(e.output.decode()))
-        #     if raise_error:
-        #         raise e

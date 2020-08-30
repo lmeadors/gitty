@@ -1,6 +1,7 @@
 import pkg_resources  # part of setuptools
 import subprocess
 from .gitty_color import Color
+from .gitty_git_api import DescribeExecutor
 
 from .gitty_project_type import *
 
@@ -20,7 +21,7 @@ def command_setup(context):
     from .gitty_git_api import CommandExecutor
 
     # set up the git API if it's missing
-    if not context['git_api']:
+    if 'git_api' not in context:
         context['executor'] = CommandExecutor()
         context['git_api'] = GitAPI(context["executor"])
 
@@ -361,8 +362,20 @@ class GitCommandStep(CommandStep):
         GittyCommand.execute_command(context, command.split())
 
 
-# this one is a bit different - sometimes we need to specify the command as an array instead of just a string
+class GitCheckoutNewCommand(CommandStep):
+    def __init__(self, branch_key_name):
+        self.branch_key_name = branch_key_name
+
+    def describe(self, context):
+        executor = DescribeExecutor()
+        return context['git_api'].checkout_new(context, context[self.branch_key_name], executor)
+
+    def execute(self, context):
+        return context['git_api'].checkout_new(context, context[self.branch_key_name])
+
+
 class GitCommandBump(CommandStep):
+    # this one is a bit different - sometimes we need to specify the command as an array instead of just a string
     # todo: migrate this to use the new git api in the context
     def __init__(self, version_name):
         self.version_name = version_name
