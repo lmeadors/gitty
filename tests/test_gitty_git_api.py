@@ -2,7 +2,8 @@ import os
 import tempfile
 from unittest import TestCase
 
-from gitty.gitty_git_api import GitAPI, CommandExecutor
+from gitty.gitty_git_api import GitAPI
+from gitty import DescribeExecutor, CommandExecutor
 
 
 class TestGitAPI(TestCase):
@@ -69,7 +70,9 @@ class TestGitAPI(TestCase):
         self.assertTrue(new_branch not in git.get_unmerged_branch_names(context))
 
         # what branches have been merged here?
-        self.assertTrue(new_branch in git.get_merged_branch_names(context))
+        names = git.get_merged_branch_names(context)
+        print('merged branches: {}'.format(names))
+        self.assertTrue(new_branch in names)
 
         # remove the merged branch
         git.remove_branch(context, new_branch)
@@ -122,6 +125,11 @@ class TestGitAPI(TestCase):
         self.assertTrue(tag0 in tag_list)
         self.assertTrue(tag1 in tag_list)
         self.assertFalse(init_commit_tag in tag_list)
+
+    def test_should_use_custom_executor(self):
+        context = {}
+        executor = DescribeExecutor()
+        self.git.get_current_branch(context, executor=executor)
 
     def create_new_git_repo(self, target=tempfile.mkdtemp()):
         # /Users/lmeadors/projects/elm/git-api-test

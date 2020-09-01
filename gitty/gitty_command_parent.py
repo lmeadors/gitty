@@ -1,4 +1,4 @@
-from gitty import GittyCommand, GitCommandStep, CommentStep
+from gitty import GittyCommand, GitCommandStep, CommentStep, GitCheckoutExistingCommand
 
 
 class GittyParent(GittyCommand):
@@ -7,8 +7,7 @@ class GittyParent(GittyCommand):
     _bindings = ['p', 'parent']
     _steps = [
         CommentStep('go to parent branch (%s)', ['parent_version_branch']),
-        # todo: migrate this to use the new git api in the context: checkout_existing()
-        GitCommandStep('git checkout %s', ['parent_version_branch'])
+        GitCheckoutExistingCommand('parent_version_branch')
     ]
 
     def is_available(self, context):

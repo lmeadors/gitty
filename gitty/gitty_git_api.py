@@ -1,64 +1,64 @@
-import subprocess
-
-
 class GitAPI:
 
     def __init__(self, command_executor):
         self.command_executor = command_executor
 
-    def get_current_branch(self, context):
+    def executor(self, executor):
+        if executor is None:
+            return self.command_executor
+        return executor
+
+    def get_current_branch(self, context, executor=None):
         # this can throw an error - the caller is expected to deal with that appropriately
-        current_branch = self.command_executor.execute_immutable_command(
+        current_branch = self.executor(executor).execute_immutable_command(
             context,
             'git rev-parse --abbrev-ref HEAD'.split(),
             raise_error=True
         )
-        return current_branch.decode().strip()
+        return current_branch
 
     def get_tags_on_commit(self, context):
         tags = self.command_executor.execute_immutable_command(
             context,
             'git tag --points-at HEAD'.split()
         )
-        return tags.decode().split()
+        return tags.split()
 
-    def commit(self, context, message):
+    def commit(self, context, message, executor=None):
         command_parts = [
             'git',
             'commit',
             '-m',
             message
         ]
-        return self.command_executor.execute_command(context, command_parts)
+        return self.executor(executor).execute_command(context, command_parts)
 
     def status_is_clean(self, context):
-        status = self.command_executor.execute_immutable_command(context, 'git status -s'.split()).decode()
+        status = self.command_executor.execute_immutable_command(context, 'git status -s'.split())
         return status == ''
 
     def get_merged_branch_names(self, context):
         merged_branches = self.command_executor.execute_immutable_command(
             context,
             'git branch --no-color --merged'.split()
-        ).decode()
-        return merged_branches
+        )
+        return merged_branches.split()
 
     def get_unmerged_branch_names(self, context):
         unmerged_branches = self.command_executor.execute_immutable_command(
             context,
             'git branch --no-color --no-merged'.split()
-        ).decode()
+        )
         return unmerged_branches
 
     def remove_branch(self, context, branch_name):
         return self.command_executor.execute_command(context, 'git branch -d {}'.format(branch_name).split())
 
-    def checkout_existing(self, context, branch_name):
-        return self.command_executor.execute_command(context, 'git checkout {}'.format(branch_name).split())
+    def checkout_existing(self, context, branch_name, executor=None):
+        return self.executor(executor).execute_command(context, 'git checkout {}'.format(branch_name).split())
 
     def checkout_new(self, context, branch_name, executor=None):
-        if executor is None:
-            executor = self.command_executor
-        return executor.execute_command(context, 'git checkout -b {}'.format(branch_name).split())
+        return self.executor(executor).execute_command(context, 'git checkout -b {}'.format(branch_name).split())
 
     def merge(self, context, branch_to_merge):
         return self.command_executor.execute_command(
@@ -85,35 +85,3 @@ class GitAPI:
         return self.command_executor.execute_command(context, 'git pull --rebase'.split())
 
 
-class DescribeExecutor:
-
-    def execute_command(self, context, command_parts, raise_error=False, dry_run=False):
-        response = ' '.join(command_parts)
-        return [response]
-
-    def execute_immutable_command(self, context, command_parts, raise_error=False, dry_run=False):
-        return self.execute_command(context, command_parts, False, False)
-
-
-class CommandExecutor:
-
-    def __init__(self, dry_run=False):
-        self.dry_run = dry_run
-
-    def execute_command(self, context, command_parts, raise_error=False, dry_run=False):
-        # if either of these is true, it's a dry run which means don't change anything
-        dry_run = self.dry_run or dry_run
-        # show the command to be run
-        print('$', ' '.join(command_parts))
-        if not dry_run:
-            try:
-                return subprocess.check_output(command_parts)
-            except subprocess.CalledProcessError as e:
-                from gitty import Color
-                print(Color.red_lt(e.output.decode()))
-                if raise_error:
-                    raise e
-
-    # noinspection PyMethodMayBeStatic
-    def execute_immutable_command(self, context, command_parts, raise_error=False, dry_run=False):
-        return self.execute_command(context, command_parts, raise_error, dry_run)

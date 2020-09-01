@@ -1,7 +1,7 @@
 import pkg_resources  # part of setuptools
 import subprocess
 from .gitty_color import Color
-from .gitty_git_api import DescribeExecutor
+from .gitty_executor import DescribeExecutor, CommandExecutor
 
 from .gitty_project_type import *
 
@@ -18,7 +18,6 @@ def command_setup(context):
     from .gitty_command_task import GittyTask
     from .gitty_command_version import GittyVersion
     from .gitty_git_api import GitAPI
-    from .gitty_git_api import CommandExecutor
 
     # set up the git API if it's missing
     if 'git_api' not in context:
@@ -372,6 +371,30 @@ class GitCheckoutNewCommand(CommandStep):
 
     def execute(self, context):
         return context['git_api'].checkout_new(context, context[self.branch_key_name])
+
+
+class GitCheckoutExistingCommand(CommandStep):
+    def __init__(self, branch_key_name):
+        self.branch_key_name = branch_key_name
+
+    def describe(self, context):
+        executor = DescribeExecutor()
+        return context['git_api'].checkout_existing(context, context[self.branch_key_name], executor)
+
+    def execute(self, context):
+        return context['git_api'].checkout_existing(context, context[self.branch_key_name])
+
+
+class GitCommandBumpNew(CommandStep):
+    def __init__(self, version_name):
+        self.version_name = version_name
+
+    def describe(self, context):
+        executor = DescribeExecutor()
+        return context['git_api'].commit('bumped version to {}'.format(context[self.version_name]), executor)
+
+    def execute(self, context):
+        return context['git_api'].commit('bumped version to {}'.format(context[self.version_name]))
 
 
 class GitCommandBump(CommandStep):
