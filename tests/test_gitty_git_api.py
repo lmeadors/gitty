@@ -24,41 +24,41 @@ class TestGitAPI(TestCase):
 
         # make a temp file in our repo and add it
         with open('file_to_add.txt', 'w+') as file_to_add:
-            git.add(context, file_to_add.name)
+            git.add(context, file_to_add.name, True)
 
         # commit that added file
         git.commit(context, 'this is a long message - neat, huh?')
 
         # make a tag - we'll use this later...
         init_commit_tag = 'init-commit-tag'
-        git.tag(context, init_commit_tag)
+        git.tag(context, init_commit_tag, True)
 
         # what branch are we on?
         branch = git.get_current_branch(context)
         self.assertEqual('master', branch)
 
         # the repo should be clean now
-        self.assertTrue(git.status_is_clean(context))
+        self.assertEqual('', git.status_is_clean(context))
 
         # make a new branch
         new_branch = "test_branch_01"
-        git.checkout_new(context, new_branch)
+        git.checkout_new(context, new_branch, True, None)
 
         # make a temp file in our repo and add it to the new branch
         with open('file_to_add_on_branch.txt', 'w+') as file_to_add_2:
-            git.add(context, file_to_add_2.name)
+            git.add(context, file_to_add_2.name, True)
 
         # check our status - we are not clean now
-        self.assertFalse(git.status_is_clean(context))
+        self.assertNotEqual('', git.status_is_clean(context))
 
         # commit the new file
         git.commit(context, 'this is a new file on our new {} branch'.format(new_branch))
 
         # check our status - we are not clean now
-        self.assertTrue(git.status_is_clean(context))
+        self.assertEqual('', git.status_is_clean(context))
 
         # go back to master
-        git.checkout_existing(context, 'master')
+        git.checkout_existing(context, 'master', True, None)
 
         # what branches are not merged here yet?
         self.assertTrue(new_branch in git.get_unmerged_branch_names(context))
@@ -83,26 +83,26 @@ class TestGitAPI(TestCase):
 
         # make a conflicting change on 2 branches and merge them using the "ours" strategy
         conflict_branch = 'conflict_branch'
-        git.checkout_new(context, conflict_branch)
+        git.checkout_new(context, conflict_branch, True, None)
 
-        git.checkout_existing(context, 'master')
+        git.checkout_existing(context, 'master', True, None)
         master_content = 'this is the file on the master branch - its contents should be preserved'
         with open('conflict.txt', 'w') as master_file:
             master_file.write(master_content)
 
-        git.add(context, master_file.name)
+        git.add(context, master_file.name, True)
         git.commit(context, master_content)
 
-        git.checkout_existing(context, conflict_branch)
+        git.checkout_existing(context, conflict_branch, True, None)
         branch_content = 'this is the file on the conflict branch - its contents should be discarded'
         with open('conflict.txt', 'w') as branch_file:
             branch_file.write(branch_content)
 
-        git.add(context, branch_file.name)
+        git.add(context, branch_file.name, True)
         git.commit(context, branch_content)
 
         # go back to master and make sure the new branch appears to need to be merged
-        git.checkout_existing(context, 'master')
+        git.checkout_existing(context, 'master', True, None)
         self.assertTrue(conflict_branch in git.get_unmerged_branch_names(context))
 
         # merge and verify the branch is merged
@@ -117,9 +117,9 @@ class TestGitAPI(TestCase):
 
         # tag this commit a couple of times and verify that the tags exist
         tag0 = 'tag-1.1.0'
-        git.tag(context, tag0)
+        git.tag(context, tag0, True)
         tag1 = 'tag-1.1.1'
-        git.tag(context, tag1)
+        git.tag(context, tag1, True)
         tag_list = git.get_tags_on_commit(context)
         self.assertEqual(2, len(tag_list))
         self.assertTrue(tag0 in tag_list)

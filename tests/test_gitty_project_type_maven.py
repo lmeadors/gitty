@@ -60,6 +60,9 @@ class TestGittyMaven(ProjectTypeTestCase):
             'hotfix': False,
             'tags_on_commit': [],
 
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
+
         }
 
         # create the project and verify it is setting the context up as expected
@@ -69,7 +72,6 @@ class TestGittyMaven(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_get_version_info_from_stable_master(self):
-
         # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
 
@@ -93,7 +95,9 @@ class TestGittyMaven(ProjectTypeTestCase):
             'a_task': False,
             'a_release': False,
             'task_prefix': '1.0/tasks/',
-            'current_release_branch': '1.0/releases'
+            'current_release_branch': '1.0/releases',
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here'
         }
 
         # create the project and verify it is setting the context up as expected
@@ -103,7 +107,6 @@ class TestGittyMaven(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_get_version_info_from_master_task(self):
-
         # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
 
@@ -127,7 +130,9 @@ class TestGittyMaven(ProjectTypeTestCase):
             'a_task': True,
             'a_release': False,
             'task_prefix': None,
-            'current_release_branch': None
+            'current_release_branch': None,
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here'
         }
 
         self.check_project_type_version_info(expected, GittyMaven(), 'tasks/123_snapped_the_frame')
@@ -136,7 +141,6 @@ class TestGittyMaven(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_get_version_info_from_stable_task(self):
-
         # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir('sample_files/maven_snapshot')
 
@@ -160,7 +164,9 @@ class TestGittyMaven(ProjectTypeTestCase):
             'a_task': True,
             'a_release': False,
             'task_prefix': None,
-            'current_release_branch': '1.0/releases'
+            'current_release_branch': '1.0/releases',
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here'
         }
 
         self.check_project_type_version_info(expected, GittyMaven(), '1.0/tasks/123_snapped_the_frame')
@@ -169,7 +175,6 @@ class TestGittyMaven(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_get_version_info_from_release_for_hotfix(self):
-
         # save our location and go to the sample dir we need
         cwd = self.go_to_sample_dir('sample_files/maven_release')
 
@@ -194,7 +199,9 @@ class TestGittyMaven(ProjectTypeTestCase):
             'a_task': False,
             'a_release': True,
             'task_prefix': None,
-            'current_release_branch': '1.2/releases'
+            'current_release_branch': '1.2/releases',
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here'
         }
 
         self.check_project_type_version_info(expected, GittyMaven(), '1.2/releases', tags)
@@ -203,7 +210,6 @@ class TestGittyMaven(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_bump_version(self):
-
         # go to the sample directory
         cwd = self.go_to_sample_dir()
 
@@ -239,7 +245,6 @@ class TestGittyMaven(ProjectTypeTestCase):
         os.chdir(cwd)
 
     def test_do_not_bump_version_if_dry_run(self):
-
         cwd = self.go_to_sample_dir()
 
         # copy the pom to a temp location first

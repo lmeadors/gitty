@@ -10,6 +10,9 @@ class MockGitApi:
     def get_tags_on_commit(self, context):
         return []
 
+    def git_hash(self, context, quiet):
+        return 'hash-goes-here'
+
 
 class TestCommand(TestCase):
 

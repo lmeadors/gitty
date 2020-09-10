@@ -35,6 +35,8 @@ class TestGittyNode(ProjectTypeTestCase):
         cwd = self.go_to_sample_dir()
 
         expected = {
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
             'project_type_name': 'node',
             'project_file': 'package.json',
 
@@ -74,6 +76,8 @@ class TestGittyNode(ProjectTypeTestCase):
         cwd = self.go_to_sample_dir()
 
         expected = {
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
             'project_type_name': 'node',
             'project_file': 'package.json',
             'current_version': '1.2.4',
@@ -108,6 +112,8 @@ class TestGittyNode(ProjectTypeTestCase):
         cwd = self.go_to_sample_dir()
 
         expected = {
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
             'project_type_name': 'node',
             'project_file': 'package.json',
             'tags_on_commit': [],
@@ -141,6 +147,8 @@ class TestGittyNode(ProjectTypeTestCase):
         cwd = self.go_to_sample_dir()
 
         expected = {
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
             'current_branch': '1.2/tasks/123_snapped_the_frame',
             'is_stable': True,
             'branch_parts': ['1.2', 'tasks', '123_snapped_the_frame'],
@@ -175,6 +183,8 @@ class TestGittyNode(ProjectTypeTestCase):
 
         tags = ['1.2.4']
         expected = {
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
             'current_branch': '1.2/releases',
             'is_stable': True,
             'branch_parts': ['1.2', 'releases'],

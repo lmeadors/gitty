@@ -103,6 +103,12 @@ class GittyCommand:
     @staticmethod
     def add_branch_info_to_context(context, current_branch):
 
+        # what is the commit hash
+        if 'git_ref' not in context:
+            # by default, use the current HEAD
+            context['git_ref'] = 'HEAD'
+        context['git_hash'] = context['git_api'].git_hash(context, quiet=True)
+
         # is this commit tagged? if so, this could be a hotfix
         context['tags_on_commit'] = context['git_api'].get_tags_on_commit(context)
 
@@ -181,7 +187,7 @@ class GittyCommand:
     def execute_steps(steps, context):
         for step in steps:
             if context.get('continue', True):
-                step.execute(context)
+                step.execute(context, False)
 
     @staticmethod
     def describe_steps(steps, context):
@@ -318,7 +324,7 @@ class CommandStep:
     def describe(self, context):
         return []
 
-    def execute(self, context):
+    def execute(self, context, quiet):
         return
 
 
@@ -328,7 +334,7 @@ class CommentStep(CommandStep):
         self.comment = comment
         self.context_entry_names = context_entry_names
 
-    def describe(self, context):
+    def describe(self, context, quiet=False):
         param_values = []
         for name in self.context_entry_names:
             param_values.append(context[name])
@@ -352,7 +358,7 @@ class GitCommandStep(CommandStep):
             '$ ' + self.cmd_template % tuple(param_values)
         ]
 
-    def execute(self, context):
+    def execute(self, context, quiet=False):
         param_values = []
         for name in self.context_entry_names:
             # print('adding {} to param-values as {}'.format(name, context[name]))
@@ -367,10 +373,10 @@ class GitCheckoutNewCommand(CommandStep):
 
     def describe(self, context):
         executor = DescribeExecutor()
-        return context['git_api'].checkout_new(context, context[self.branch_key_name], executor)
+        return context['git_api'].checkout_new(context, context[self.branch_key_name], False, executor)
 
-    def execute(self, context):
-        return context['git_api'].checkout_new(context, context[self.branch_key_name])
+    def execute(self, context, quiet):
+        return context['git_api'].checkout_new(context, context[self.branch_key_name], quiet, None)
 
 
 class GitCheckoutExistingCommand(CommandStep):
@@ -379,10 +385,10 @@ class GitCheckoutExistingCommand(CommandStep):
 
     def describe(self, context):
         executor = DescribeExecutor()
-        return context['git_api'].checkout_existing(context, context[self.branch_key_name], executor)
+        return context['git_api'].checkout_existing(context, context[self.branch_key_name], False, executor)
 
-    def execute(self, context):
-        return context['git_api'].checkout_existing(context, context[self.branch_key_name])
+    def execute(self, context, quiet):
+        return context['git_api'].checkout_existing(context, context[self.branch_key_name], quiet, None)
 
 
 class GitCommandBumpNew(CommandStep):
@@ -393,7 +399,7 @@ class GitCommandBumpNew(CommandStep):
         executor = DescribeExecutor()
         return context['git_api'].commit('bumped version to {}'.format(context[self.version_name]), executor)
 
-    def execute(self, context):
+    def execute(self, context, quiet):
         return context['git_api'].commit('bumped version to {}'.format(context[self.version_name]))
 
 
@@ -418,7 +424,7 @@ class GitCommandBump(CommandStep):
                 description.append(part)
         return ['$ ' + ' '.join(description)]
 
-    def execute(self, context):
+    def execute(self, context, quiet):
         parts = []
         for part in self.command_parts:
             if '{}' in part:
@@ -437,6 +443,6 @@ class BumpVersionStep(CommandStep):
             '# bump version to {}'.format(context[self.new_version_name]),
         ]
 
-    def execute(self, context):
+    def execute(self, context, quiet):
         context['project_type'].bump_version_to(context, context[self.new_version_name])
 

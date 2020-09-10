@@ -17,7 +17,7 @@ class GittyParent(GittyCommand):
 
     def do_it(self, context):
         for step in self._steps:
-            step.execute(context)
+            step.execute(context, False)
 
     def get_description(self, context):
         description = []

@@ -37,6 +37,9 @@ class TestGittyPip(ProjectTypeTestCase):
             'project_type_name': 'pip',
             'project_file': 'setup.py',
 
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
+
             'current_version': '1.1.2',
             'release_version': '1.1.2',
             'next_stable_version': '1.1.3',
@@ -74,6 +77,9 @@ class TestGittyPip(ProjectTypeTestCase):
         expected = {
             'project_type_name': 'pip',
             'project_file': 'setup.py',
+
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
 
             'current_version': '1.1.2',
             'release_version': '1.1.2',
@@ -113,6 +119,8 @@ class TestGittyPip(ProjectTypeTestCase):
             'project_type_name': 'pip',
             'project_file': 'setup.py',
 
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
             'current_version': '1.1.2',
             'release_version': '1.1.2',
             'next_stable_version': '1.1.3',
@@ -149,6 +157,9 @@ class TestGittyPip(ProjectTypeTestCase):
         expected = {
             'project_type_name': 'pip',
             'project_file': 'setup.py',
+
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
 
             'current_version': '1.1.2',
             'release_version': '1.1.2',
@@ -187,6 +198,9 @@ class TestGittyPip(ProjectTypeTestCase):
         expected = {
             'project_type_name': 'pip',
             'project_file': 'setup.py',
+
+            'git_ref': 'HEAD',
+            'git_hash': 'git_hash_here',
 
             'current_version': '1.1.2',
             'release_version': '1.1.2',

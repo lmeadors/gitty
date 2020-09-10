@@ -32,8 +32,12 @@ class ProjectTypeTestCase(TestCase):
 
     def check_project_type_version_info(self, expected, project, current_branch, tags=[]):
         class TestGitApi:
+
             def get_tags_on_commit(self, context):
                 return tags
+
+            def git_hash(self, context, quiet):
+                return 'git_hash_here'
 
         context = {
             'git_api': TestGitApi()

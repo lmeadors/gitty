@@ -5,22 +5,23 @@ class GitStatusCheckStep(CommandStep):
     def describe(self, context):
         return ['# make sure the git repo has no outstanding changes']
 
-    def execute(self, context):
-        # todo: migrate this to use the new git api in the context: status_is_clean()
-        # set context['continue'] = False if we don't want to continue
-        response = GittyCommand.execute_command_safe(context, 'git status -s'.split())
+    def execute(self, context, quiet):
+        response = context['git_api'].status_is_clean(context, quiet)
+        # response = GittyCommand.execute_command_safe(context, 'git status -s'.split())
         if response:
             # this repo isn't "clean", so don't continue...
-            print(Color.red(response.decode()))
+            print(Color.red(response))
             print(Color.red_lt('aborting cleanup process - repository has outstanding changes'))
+            # set context['continue'] = False if we don't want to continue
             context['continue'] = False
 
 
 class GitCleanStep(CommandStep):
+
     def describe(self, context):
         return ['# remove select local branches that have been merged to {}'.format(context['current_branch'])]
 
-    def execute(self, context):
+    def execute(self, context, quiet):
         # todo: migrate this to use the new git api in the context: get_merged_branch_names()
         command_output = GittyCommand.execute_command_safe(context, 'git branch --no-color --merged'.split())
         output_decoded = command_output.decode('utf-8')
@@ -58,7 +59,10 @@ class GittyClean(GittyCommand):
     ]
 
     def is_available(self, context):
-        return context['current_branch'] is not None
+        if context['git_api'].status_is_clean(context, quiet=True):
+            return False
+        else:
+            return context['current_branch'] is not None
 
     def do_it(self, context):
         GittyCommand.execute_steps(self._steps, context)
