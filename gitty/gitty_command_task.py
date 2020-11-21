@@ -1,6 +1,6 @@
 import sys
 
-from gitty import GittyCommand, GitCommandStep, CommentStep
+from gitty import GittyCommand, CommentStep, GitCheckoutNewCommand
 
 
 class GittyTask(GittyCommand):
@@ -13,7 +13,7 @@ class GittyTask(GittyCommand):
             'for example: if you said "gitty {} %s", then you would get this:'.format(_bindings[0]),
             ['task_name']
         ),
-        GitCommandStep('git checkout -b %s%s', ['task_prefix', 'task_name']),
+        GitCheckoutNewCommand('task_branch_name'),
     ]
 
     def is_available(self, context):
@@ -30,9 +30,11 @@ class GittyTask(GittyCommand):
         # argv = [script name, command name, task name, other parameters...]
         if len(sys.argv) > 2:
             context['task_name'] = sys.argv[2]
+            context['task_branch_name'] = '{}{}'.format(context['task_prefix'], context['task_name'])
             GittyCommand.execute_steps(self._steps, context)
 
     def get_description(self, context):
         # set a sample task name here so we can demonstrate the behavior
         context['task_name'] = '123234_sample_task_here'
+        context['task_branch_name'] = '{}{}'.format(context['task_prefix'], context['task_name'])
         return GittyCommand.describe_steps(self._steps, context)

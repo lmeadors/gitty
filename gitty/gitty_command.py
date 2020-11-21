@@ -1,6 +1,7 @@
 import pkg_resources  # part of setuptools
 import subprocess
 from .gitty_color import Color
+from .gitty_executor import DescribeExecutor, CommandExecutor
 
 from .gitty_project_type import *
 
@@ -17,11 +18,11 @@ def command_setup(context):
     from .gitty_command_task import GittyTask
     from .gitty_command_version import GittyVersion
     from .gitty_git_api import GitAPI
-    from .gitty_git_api import CommandExecutor
 
-    # set up the git API
-    context['executor'] = CommandExecutor()
-    context['git_api'] = GitAPI(context["executor"])
+    # set up the git API if it's missing
+    if 'git_api' not in context:
+        context['executor'] = CommandExecutor()
+        context['git_api'] = GitAPI(context["executor"])
 
     # register the available commands
     context["commands"] = [
@@ -102,6 +103,15 @@ class GittyCommand:
     @staticmethod
     def add_branch_info_to_context(context, current_branch):
 
+        # what is the commit hash
+        if 'git_ref' not in context:
+            # by default, use the current HEAD
+            context['git_ref'] = 'HEAD'
+        context['git_hash'] = context['git_api'].git_hash(context, quiet=True)
+
+        # is this commit tagged? if so, this could be a hotfix
+        context['tags_on_commit'] = context['git_api'].get_tags_on_commit(context)
+
         # split the branch name into its components
         branch_parts = current_branch.split("/")
 
@@ -177,7 +187,7 @@ class GittyCommand:
     def execute_steps(steps, context):
         for step in steps:
             if context.get('continue', True):
-                step.execute(context)
+                step.execute(context, False)
 
     @staticmethod
     def describe_steps(steps, context):
@@ -314,7 +324,7 @@ class CommandStep:
     def describe(self, context):
         return []
 
-    def execute(self, context):
+    def execute(self, context, quiet):
         return
 
 
@@ -324,7 +334,7 @@ class CommentStep(CommandStep):
         self.comment = comment
         self.context_entry_names = context_entry_names
 
-    def describe(self, context):
+    def describe(self, context, quiet=False):
         param_values = []
         for name in self.context_entry_names:
             param_values.append(context[name])
@@ -334,6 +344,7 @@ class CommentStep(CommandStep):
 
 
 class GitCommandStep(CommandStep):
+    # todo: migrate this to use the new git api in the context
     def __init__(self, cmd_template, context_entry_names):
         self.cmd_template = cmd_template
         self.context_entry_names = context_entry_names
@@ -347,7 +358,7 @@ class GitCommandStep(CommandStep):
             '$ ' + self.cmd_template % tuple(param_values)
         ]
 
-    def execute(self, context):
+    def execute(self, context, quiet=False):
         param_values = []
         for name in self.context_entry_names:
             # print('adding {} to param-values as {}'.format(name, context[name]))
@@ -356,8 +367,45 @@ class GitCommandStep(CommandStep):
         GittyCommand.execute_command(context, command.split())
 
 
-# this one is a bit different - sometimes we need to specify the command as an array instead of just a string
+class GitCheckoutNewCommand(CommandStep):
+    def __init__(self, branch_key_name):
+        self.branch_key_name = branch_key_name
+
+    def describe(self, context):
+        executor = DescribeExecutor()
+        return context['git_api'].checkout_new(context, context[self.branch_key_name], False, executor)
+
+    def execute(self, context, quiet):
+        return context['git_api'].checkout_new(context, context[self.branch_key_name], quiet, None)
+
+
+class GitCheckoutExistingCommand(CommandStep):
+    def __init__(self, branch_key_name):
+        self.branch_key_name = branch_key_name
+
+    def describe(self, context):
+        executor = DescribeExecutor()
+        return context['git_api'].checkout_existing(context, context[self.branch_key_name], False, executor)
+
+    def execute(self, context, quiet):
+        return context['git_api'].checkout_existing(context, context[self.branch_key_name], quiet, None)
+
+
+class GitCommandBumpNew(CommandStep):
+    def __init__(self, version_name):
+        self.version_name = version_name
+
+    def describe(self, context):
+        executor = DescribeExecutor()
+        return context['git_api'].commit('bumped version to {}'.format(context[self.version_name]), executor)
+
+    def execute(self, context, quiet):
+        return context['git_api'].commit('bumped version to {}'.format(context[self.version_name]))
+
+
 class GitCommandBump(CommandStep):
+    # this one is a bit different - sometimes we need to specify the command as an array instead of just a string
+    # todo: migrate this to use the new git api in the context
     def __init__(self, version_name):
         self.version_name = version_name
         self.command_parts = [
@@ -376,7 +424,7 @@ class GitCommandBump(CommandStep):
                 description.append(part)
         return ['$ ' + ' '.join(description)]
 
-    def execute(self, context):
+    def execute(self, context, quiet):
         parts = []
         for part in self.command_parts:
             if '{}' in part:
@@ -395,6 +443,6 @@ class BumpVersionStep(CommandStep):
             '# bump version to {}'.format(context[self.new_version_name]),
         ]
 
-    def execute(self, context):
+    def execute(self, context, quiet):
         context['project_type'].bump_version_to(context, context[self.new_version_name])
 

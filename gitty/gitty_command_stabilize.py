@@ -2,6 +2,7 @@ from gitty import GittyCommand, GitCommandStep, BumpVersionStep, GitCommandBump,
 
 
 class GittyStabilize(GittyCommand):
+    # todo: migrate this to use the new git api in the context
     _title = 'stabilize'
     _name = 'create stabilization ecosystem'
     _bindings = ['s', 'stabilize']
