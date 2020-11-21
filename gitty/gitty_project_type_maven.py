@@ -28,15 +28,14 @@ class GittyMaven(GittyProjectType):
         pom, pom_doc = self.read_pom()
 
         current_version_tag = pom.find('pom:version', self.ns)
-        context['current_version'] = current_version_tag.text
+        current_version = current_version_tag.text
+        context['current_version'] = current_version
 
-        # todo: we could use `git tag --points-at HEAD` to see if this commit is tagged - that might be a better way to
-        #  know if we want a hotfix or not - for now, this will do...
+        context['hotfix'] = current_version in context['tags_on_commit']
 
         if context['current_version'].endswith('-SNAPSHOT'):
 
             # we're not on a release branch
-            context['hotfix'] = False
 
             context['release_version'] = context['current_version'][: -9]
 
@@ -72,8 +71,6 @@ class GittyMaven(GittyProjectType):
 
         else:
             # this can happen when making a hotfix!
-
-            context['hotfix'] = True
 
             # we want to make a stabilization ecosystem from this commit...
             context['release_version'] = context['current_version']

@@ -1,58 +1,104 @@
-import subprocess
-
-from gitty import Color
-
-
 class GitAPI:
 
     def __init__(self, command_executor):
         self.command_executor = command_executor
 
-    def get_current_branch(self, context):
+    def executor(self, executor):
+        if executor is None:
+            return self.command_executor
+        return executor
+
+    def get_current_branch(self, context, quiet=False, executor=None):
         # this can throw an error - the caller is expected to deal with that appropriately
-        current_branch = self.command_executor.execute_immutable_command(
+        current_branch = self.executor(executor).execute_immutable_command(
             context,
             'git rev-parse --abbrev-ref HEAD'.split(),
+            quiet,
             raise_error=True
         )
-        return current_branch.decode().strip()
+        return current_branch
 
-    def commit(self, context, message):
+    def git_hash(self, context, quiet=False):
+        # print('quiet:', quiet)
+        self.command_executor.execute_immutable_command(
+            context,
+            'git rev-parse --verify {}'.format(context['git_ref']).split(),
+            quiet=quiet
+        )
+
+    def get_tags_on_commit(self, context, quiet=True):
+        tags = self.command_executor.execute_immutable_command(
+            context,
+            'git tag --points-at HEAD'.split(),
+            quiet
+        )
+        return tags.split()
+
+    def commit(self, context, message, executor=None):
         command_parts = [
             'git',
             'commit',
             '-m',
             message
         ]
-        self.command_executor.execute_command(context, command_parts)
-        return
+        return self.executor(executor).execute_command(context, command_parts, True)
 
+    def status_is_clean(self, context, quiet=False):
+        # print('git api - quiet:', quiet)
+        status = self.command_executor.execute_immutable_command(context, 'git status -s'.split(), quiet)
+        return status
 
-class CommandExecutor:
+    def get_merged_branch_names(self, context):
+        merged_branches = self.command_executor.execute_immutable_command(
+            context,
+            'git branch --no-color --merged'.split(),
+            True
+        )
+        return merged_branches.split()
 
-    def __init__(self, dry_run=False):
-        self.dry_run = dry_run
+    def get_unmerged_branch_names(self, context):
+        unmerged_branches = self.command_executor.execute_immutable_command(
+            context,
+            'git branch --no-color --no-merged'.split(),
+            True
+        )
+        return unmerged_branches
 
-    def execute_command(self, context, command_parts, raise_error=False):
-        # show the command to be run
-        print('$', ' '.join(command_parts))
+    def remove_branch(self, context, branch_name):
+        return self.command_executor.execute_command(
+            context,
+            'git branch -d {}'.format(branch_name).split(),
+            True
+        )
 
-        if not self.dry_run:
-            try:
-                return subprocess.check_output(command_parts)
-            except subprocess.CalledProcessError as e:
-                print(Color.red_lt(e.output.decode()))
-                if raise_error:
-                    raise e
+    def checkout_existing(self, context, branch_name, quiet, executor):
+        return self.executor(executor).execute_command(context, 'git checkout {}'.format(branch_name).split(), quiet)
 
-    # noinspection PyMethodMayBeStatic
-    def execute_immutable_command(self, context, command_parts, raise_error=False):
-        # show the command to be run
-        print('$', ' '.join(command_parts))
+    def checkout_new(self, context, branch_name, quiet, executor):
+        return self.executor(executor).execute_command(context, 'git checkout -b {}'.format(branch_name).split(), quiet)
 
-        try:
-            return subprocess.check_output(command_parts)
-        except subprocess.CalledProcessError as e:
-            print(Color.red_lt(e.output.decode()))
-            if raise_error:
-                raise e
+    def merge(self, context, branch_to_merge):
+        return self.command_executor.execute_command(
+            context,
+            'git merge {}'.format(branch_to_merge).split(),
+            True
+        )
+
+    def merge_ours(self, context, branch_to_merge):
+        return self.command_executor.execute_command(
+            context,
+            'git merge --strategy=ours {}'.format(branch_to_merge).split(),
+            True
+        )
+
+    def tag(self, context, tag, quiet):
+        return self.command_executor.execute_command(context, 'git tag {}'.format(tag).split(), quiet)
+
+    def add(self, context, file_to_add, quiet):
+        return self.command_executor.execute_command(context, 'git add {}'.format(file_to_add).split(), quiet)
+
+    def fetch_and_prune(self, context, quiet):
+        return self.command_executor.execute_command(context, 'git fetch --all --prune'.split(), quiet)
+
+    def pull_and_rebase(self, context, quiet):
+        return self.command_executor.execute_command(context, 'git pull --rebase'.split(), quiet)

@@ -19,15 +19,14 @@ class GittyNode(GittyProjectType):
     def get_version_info(self, context):
         # node project file...
 
-        # todo: we could use `git tag --points-at HEAD` to see if this commit is tagged - that might be a better way to
-        #  know if we want a hotfix or not - for now, we'll assume that hotfix doesn't really apply for node
-        #  projects - any commit could be the starting point for a hotfix.
-        context['hotfix'] = True
+
 
         with open(context['project_file']) as package_json:
             data = json.load(package_json)
-            context['current_version'] = data['version']
-            context['release_version'] = data['version']
+            current_version = data['version']
+            context['hotfix'] = current_version in context['tags_on_commit']
+            context['current_version'] = current_version
+            context['release_version'] = current_version
             release_version_split = context['release_version'].split(".")
 
             if context['is_stable']:

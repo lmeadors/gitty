@@ -2,6 +2,7 @@ from gitty import GittyCommand, CommentStep, GitCommandStep, BumpVersionStep, Gi
 
 
 class GittyRelease(GittyCommand):
+    # todo: migrate this to use the new git api in the context
     _title = 'release'
     _name = 'snap a new release from here'
     _bindings = ['r', 'release']
