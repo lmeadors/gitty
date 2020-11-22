@@ -2,11 +2,11 @@ import subprocess
 
 
 class BaseExecutor:
-    def execute_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> str:
+    def execute_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> [str]:
         """executes a command and returns the output as a decoded and stripped string"""
         pass
 
-    def execute_immutable_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> str:
+    def execute_immutable_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> [str]:
         """executes a command and returns the output as a decoded and stripped string"""
         pass
 
@@ -26,7 +26,7 @@ class CommandExecutor(BaseExecutor):
     def __init__(self, dry_run=False):
         self.dry_run = dry_run
 
-    def execute_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> str:
+    def execute_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> [str]:
         # if either of these is true, it's a dry run which means don't change anything
         dry_run = self.dry_run or dry_run
         # show the command to be run
@@ -41,6 +41,6 @@ class CommandExecutor(BaseExecutor):
                 if raise_error:
                     raise e
 
-    def execute_immutable_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> str:
+    def execute_immutable_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> [str]:
         # print('exec - quiet:', quiet)
         return self.execute_command(context, command_parts, quiet, raise_error, dry_run)

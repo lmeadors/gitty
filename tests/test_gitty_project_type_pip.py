@@ -40,19 +40,19 @@ class TestGittyPip(ProjectTypeTestCase):
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
 
-            'current_version': '1.1.2',
-            'release_version': '1.1.2',
-            'next_stable_version': '1.1.3',
-            'next_master_version': '1.2.0',
+            'current_version': '1.2.0.dev0',
+            'release_version': '1.2.0',
+            'next_stable_version': '1.2.1.dev0',
+            'next_master_version': '1.3.0.dev0',
 
             'branch_parts': ['master'],
             'current_branch': 'master',
             'current_release_branch': None,
             'task_prefix': 'tasks/',
 
-            'new_release_branch': '1.1/releases',
-            'new_stabilization_branch': '1.1/master',
-            'new_stabilization_version': '1.1.2',
+            'new_release_branch': '1.2/releases',
+            'new_stabilization_branch': '1.2/master',
+            'new_stabilization_version': '1.2.0.dev0',
 
             'the_master': True,
             'a_master': True,

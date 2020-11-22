@@ -147,6 +147,7 @@ class GittyCommand:
             # a master that isn't THE master is in a stabilization ecosystem
             is_stable = True
         else:
+            # task branches are not stable
             is_stable = False
 
         if the_master:
@@ -187,7 +188,7 @@ class GittyCommand:
     def execute_steps(steps, context):
         for step in steps:
             if context.get('continue', True):
-                step.execute(context, False)
+                step.execute(context)
 
     @staticmethod
     def describe_steps(steps, context):
@@ -307,7 +308,7 @@ class GittyCommand:
                 # we're on a task or release branch - the parent is different...
                 context['parent_version_branch'] = context['branch_parts'][0] + '/master'
             else:
-                if len(context['current_version_parts']) < 4:
+                if len(context['current_version_parts']) <= 4:
                     # parent is just master
                     context['parent_version_branch'] = 'master'
                 else:

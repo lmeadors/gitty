@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name="gitty",
-    version="1.1.2",
+    version="1.2.0.dev0",
     author="Larry Meadors",
     author_email="larry.meadors@elm-software.com",
     description="An alternate git workflow tool",

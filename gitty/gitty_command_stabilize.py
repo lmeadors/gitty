@@ -26,7 +26,7 @@ class GittyStabilize(GittyCommand):
         GitCommandBump('new_stabilization_version')
     ]
 
-    # we do the steps above AND these for a normal stabilization ecosystem
+    # we do the steps above AND THEN THESE for a normal stabilization ecosystem
     _steps_from_point = [
         GitCommandStep('git checkout %s', ['current_branch']),
         BumpVersionStep('next_stable_version'),
@@ -34,6 +34,7 @@ class GittyStabilize(GittyCommand):
         GitCommandBump('next_stable_version'),
     ]
 
+    # we do these steps from THE master branch
     _steps_from_master = [
         # '$ git checkout -b {}'.format(context['new_stabilization_branch']),
         GitCommandStep('git checkout -b %s', ['new_stabilization_branch']),

@@ -8,7 +8,8 @@ place for me to add notes so i remember how to do stuff. :|
 You'll want to use one of the master branches for development work - from the project root, you can do this to install 
 a development snapshot from your sources:
 
-    git checkout 1.0/master
+    git checkout master
+    pip3 uninstall gitty
     pip3 install -e .
    
 This is a "live" version - as you make changes to the project, running it will be reflected immediately.

@@ -214,3 +214,13 @@ Creating the next release is exactly the same as before:
 
 You'll see a pile of output again, and at the end, there will be `1.1/master` and `1.1/release` branches and a new `1.1.0` tag for the release candidate.
 
+# Versioning for python projects (i.e., eating my own dog food)
+
+I'm using this tool to manage the git repository for this tool, so its versioning approach is the one that it supports.
+
+The versioning scheme is based on [semver 2.0.0](https://semver.org/spec/v2.0.0.html), and will use a suffix of "dev0" 
+to indicate that a version is not a release (and partly because of how setuptools behaves).
+
+For this project, non-release builds will not be deployed to pypi - only actual releases will be deployed.
+
+This versioning will start as of version 1.2.0.dev0 (currently master).

@@ -17,25 +17,36 @@ class GittyPip(GittyProjectType):
         return is_pip
 
     def get_version_info(self, context):
+
+        # load what we know from the setup file
         setup = run_setup(context['project_file'], stop_after='config')
-
         current_version = setup.metadata.version
-
-        context['hotfix'] = current_version in context['tags_on_commit']
-        context['current_version'] = current_version
-        context['release_version'] = current_version
-
         current_version_split = current_version.split(".")
-        stable_branch_version = '.'.join(
-            current_version_split[:-1]
-        )
+        context['current_version'] = current_version
+
+        # is this commit tagged? if so, someone may want to do a hotfix
+        context['hotfix'] = current_version in context['tags_on_commit']
+
+        # there are 2 kinds of branches
+        # - release
+        # - master (includes tasks)
+
+        # is this correct on a release branch? i don't think it is...
+        release_version = '.'.join(current_version_split[:-1])
+        context['release_version'] = release_version
+
+        stable_branch_version = '.'.join(current_version_split[:-2])
         if context['is_stable']:
-            context['new_stabilization_branch'] = current_version + '/master'
-            context['new_release_branch'] = current_version + '/releases'
-            context['new_stabilization_version'] = current_version + '.0'
+            # this means we're NOT on THE master branch or a task branch
+            context['new_stabilization_branch'] = release_version + '/master'
+            context['new_release_branch'] = release_version + '/releases'
+            context['new_stabilization_version'] = release_version + '.0.dev0'
         else:
+            # this means we're on a branch like 1.0/master
             context['new_stabilization_branch'] = stable_branch_version + '/master'
             context['new_release_branch'] = stable_branch_version + '/releases'
+            context['release_version'] = stable_branch_version + '.0'
+
             if context['the_master']:
                 context['new_stabilization_version'] = current_version
             else:
@@ -44,7 +55,7 @@ class GittyPip(GittyProjectType):
         next_master_version = '.'.join([
             current_version_split[0],
             str(int(current_version_split[1]) + 1),
-            '0'
+            '0.dev0'
         ])
         context['next_master_version'] = next_master_version
 
@@ -53,7 +64,7 @@ class GittyPip(GittyProjectType):
             current_version_split[1],
             str(int(current_version_split[2]) + 1)
         ])
-        context['next_stable_version'] = next_stable_version
+        context['next_stable_version'] = next_stable_version + '.dev0'
 
         if len(context['branch_parts']) > 1:
             context['current_release_branch'] = stable_branch_version + '/releases'
