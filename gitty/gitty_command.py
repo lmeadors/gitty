@@ -188,7 +188,7 @@ class GittyCommand:
     def execute_steps(steps, context):
         for step in steps:
             if context.get('continue', True):
-                step.execute(context)
+                step.execute(context, quiet=True)
 
     @staticmethod
     def describe_steps(steps, context):
