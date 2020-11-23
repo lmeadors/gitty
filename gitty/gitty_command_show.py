@@ -10,7 +10,7 @@ class ShowStep(CommandStep):
     def describe(self, context):
         return [self.description]
 
-    def execute(self, context):
+    def execute(self, context, **kwargs):
         def without_keys(con):
             return {x: con[x] for x in con if x not in {
                 # some context elements can't be represented as json - exclude them here
