@@ -18,9 +18,15 @@ class GitAPI:
         )
         return current_branch
 
+    def git_remote(self, context, quiet=False):
+        return self.command_executor.execute_immutable_command(
+            context,
+            'git remote'.split(),
+            quiet=quiet
+        )
+
     def git_hash(self, context, quiet=False):
-        # print('quiet:', quiet)
-        self.command_executor.execute_immutable_command(
+        return self.command_executor.execute_immutable_command(
             context,
             'git rev-parse --verify {}'.format(context['git_ref']).split(),
             quiet=quiet

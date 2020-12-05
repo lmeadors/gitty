@@ -107,10 +107,14 @@ class GittyCommand:
         if 'git_ref' not in context:
             # by default, use the current HEAD
             context['git_ref'] = 'HEAD'
-        context['git_hash'] = context['git_api'].git_hash(context, quiet=True)
+
+        git_api = context['git_api']
+
+        context['git_hash'] = git_api.git_hash(context, quiet=True)
+        context['git_remote'] = git_api.git_remote(context, quiet=True)
 
         # is this commit tagged? if so, this could be a hotfix
-        context['tags_on_commit'] = context['git_api'].get_tags_on_commit(context)
+        context['tags_on_commit'] = git_api.get_tags_on_commit(context)
 
         # split the branch name into its components
         branch_parts = current_branch.split("/")

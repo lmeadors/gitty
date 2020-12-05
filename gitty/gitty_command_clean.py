@@ -19,7 +19,15 @@ class GitStatusCheckStep(CommandStep):
 class GitCleanStep(CommandStep):
 
     def describe(self, context):
-        return ['# remove select local branches that have been merged to {}'.format(context['current_branch'])]
+
+        description = [
+            '# remove select LOCAL branches that have been merged to {}'.format(context['current_branch'])
+        ]
+
+        if 'git_remote' in context:
+            description.append('# (use --remote to also remote REMOTE branches from {})'.format(context['git_remote']))
+
+        return description
 
     def execute(self, context, quiet):
         # todo: migrate this to use the new git api in the context: get_merged_branch_names()
@@ -40,6 +48,12 @@ class GitCleanStep(CommandStep):
             if not retain_reason:
                 # todo: migrate this to use the new git api in the context: remove_branch()
                 GittyCommand.execute_command(context, 'git branch -d {}'.format(branch_name).split())
+                if 'remote' in context and 'git_remote' in context:
+                    if context['remote']:
+                        GittyCommand.execute_command(
+                            context,
+                            'git push --delete {} {}'.format(context['git_remote'], branch_name).split()
+                        )
             else:
                 print('leaving branch "{}" ({})'.format(branch_name, retain_reason))
 
