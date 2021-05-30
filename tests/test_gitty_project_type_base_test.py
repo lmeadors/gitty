@@ -39,6 +39,9 @@ class ProjectTypeTestCase(TestCase):
             def git_hash(self, context, quiet):
                 return 'git_hash_here'
 
+            def git_remote(self, context, quiet):
+                return 'git_remote_here'
+
         context = {
             'git_api': TestGitApi()
         }

@@ -39,6 +39,7 @@ class TestGittyPip(ProjectTypeTestCase):
 
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
 
             'current_version': '1.2.0.dev0',
             'release_version': '1.2.0',
@@ -80,6 +81,7 @@ class TestGittyPip(ProjectTypeTestCase):
 
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
 
             'current_version': '1.2.0.dev0',
             'release_version': '1.2.0',
@@ -121,6 +123,7 @@ class TestGittyPip(ProjectTypeTestCase):
 
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
             'current_version': '1.2.0.dev0',
             'release_version': '1.2.0',
             'next_stable_version': '1.2.1.dev0',
@@ -161,6 +164,7 @@ class TestGittyPip(ProjectTypeTestCase):
 
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
 
             'current_version': '1.2.0.dev0',
             'release_version': '1.2.0',
@@ -202,6 +206,7 @@ class TestGittyPip(ProjectTypeTestCase):
 
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
 
             'current_version': '1.2.0.dev0',
             'release_version': '1.2.0',

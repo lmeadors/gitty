@@ -37,6 +37,7 @@ class TestGittyNode(ProjectTypeTestCase):
         expected = {
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
             'project_type_name': 'node',
             'project_file': 'package.json',
 
@@ -78,6 +79,7 @@ class TestGittyNode(ProjectTypeTestCase):
         expected = {
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
             'project_type_name': 'node',
             'project_file': 'package.json',
             'current_version': '1.2.4',
@@ -114,6 +116,7 @@ class TestGittyNode(ProjectTypeTestCase):
         expected = {
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
             'project_type_name': 'node',
             'project_file': 'package.json',
             'tags_on_commit': [],
@@ -149,6 +152,7 @@ class TestGittyNode(ProjectTypeTestCase):
         expected = {
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
             'current_branch': '1.2/tasks/123_snapped_the_frame',
             'is_stable': True,
             'branch_parts': ['1.2', 'tasks', '123_snapped_the_frame'],
@@ -185,6 +189,7 @@ class TestGittyNode(ProjectTypeTestCase):
         expected = {
             'git_ref': 'HEAD',
             'git_hash': 'git_hash_here',
+            'git_remote': 'git_remote_here',
             'current_branch': '1.2/releases',
             'is_stable': True,
             'branch_parts': ['1.2', 'releases'],

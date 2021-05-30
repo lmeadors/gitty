@@ -61,6 +61,7 @@ class TestGittyMaven(ProjectTypeTestCase):
             'tags_on_commit': [],
 
             'git_ref': 'HEAD',
+            'git_remote': 'git_remote_here',
             'git_hash': 'git_hash_here',
 
         }
@@ -97,6 +98,7 @@ class TestGittyMaven(ProjectTypeTestCase):
             'task_prefix': '1.0/tasks/',
             'current_release_branch': '1.0/releases',
             'git_ref': 'HEAD',
+            'git_remote': 'git_remote_here',
             'git_hash': 'git_hash_here'
         }
 
@@ -132,6 +134,7 @@ class TestGittyMaven(ProjectTypeTestCase):
             'task_prefix': None,
             'current_release_branch': None,
             'git_ref': 'HEAD',
+            'git_remote': 'git_remote_here',
             'git_hash': 'git_hash_here'
         }
 
@@ -166,6 +169,7 @@ class TestGittyMaven(ProjectTypeTestCase):
             'task_prefix': None,
             'current_release_branch': '1.0/releases',
             'git_ref': 'HEAD',
+            'git_remote': 'git_remote_here',
             'git_hash': 'git_hash_here'
         }
 
@@ -201,6 +205,7 @@ class TestGittyMaven(ProjectTypeTestCase):
             'task_prefix': None,
             'current_release_branch': '1.2/releases',
             'git_ref': 'HEAD',
+            'git_remote': 'git_remote_here',
             'git_hash': 'git_hash_here'
         }
 

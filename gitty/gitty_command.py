@@ -10,11 +10,12 @@ def command_setup(context):
 
     # import these here to avoid circular references
     from .gitty_command_clean import GittyClean
+    from .gitty_command_head import GittyHead
     from .gitty_command_help import GittyHelp
     from .gitty_command_parent import GittyParent
     from .gitty_command_release import GittyRelease
     from .gitty_command_show import GittyShowContext
-    from .gitty_command_stabilize import GittyStabilize
+    # from .gitty_command_stabilize import GittyStabilize
     from .gitty_command_task import GittyTask
     from .gitty_command_version import GittyVersion
     from .gitty_git_api import GitAPI
@@ -29,11 +30,12 @@ def command_setup(context):
         GittyClean(),
         GittyTask(),
         GittyRelease(),
-        GittyStabilize(),
+        # GittyStabilize(),
         GittyParent(),
         GittyVersion(),
         GittyShowContext(),
         GittyHelp(),
+        GittyHead(),
     ]
 
     # import these here to avoid circular references
@@ -211,6 +213,15 @@ class GittyCommand:
         ))
         for line in self.get_description(context):
             print('  {}'.format(self.description_format(line)))
+
+    def display_head(self, context):
+        # print a blank line...
+        print()
+        # show the help for the command
+        print('{}: {}'.format(
+            self.title_format(self._title),
+            self.bindings_format(self._bindings)
+        ))
 
     def get_description(self, context):
         return [self._name]

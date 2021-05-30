@@ -34,8 +34,8 @@ def setup(context):
                 # this one started with '--', so skip it AND the following value
                 i += 2
 
-    # if there's no command set now, default it to 'help'
-    context['command'] = context.get('command', 'help')
+    # if there's no command set now, default it to 'head'
+    context['command'] = context.get('command', 'head')
 
     if context.get('no_color', False):
         Color.disable_color()

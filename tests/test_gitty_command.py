@@ -13,6 +13,9 @@ class MockGitApi:
     def git_hash(self, context, quiet):
         return 'hash-goes-here'
 
+    def git_remote(self, context, quiet=False):
+        return 'remote'
+
 
 class TestCommand(TestCase):
 
