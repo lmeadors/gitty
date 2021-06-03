@@ -15,7 +15,7 @@ class DescribeExecutor(BaseExecutor):
 
     def execute_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> [str]:
         response = ' '.join(command_parts)
-        return [response]
+        return ['$ ' + response]
 
     def execute_immutable_command(self, context, command_parts, quiet, raise_error=False, dry_run=False) -> [str]:
         return self.execute_command(context, command_parts, False, False)
