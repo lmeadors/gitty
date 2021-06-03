@@ -7,7 +7,7 @@ def register(context):
 
 
 def describe(context):
-    return 'pr - create a new AWS CodeCommit pull request'
+    return 'finish - merge a branch to it''s parent'
 
 
 class GittyFinishTask(GittyCommand):
