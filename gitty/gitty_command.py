@@ -13,6 +13,7 @@ def command_setup(context):
     from .gitty_command_head import GittyHead
     from .gitty_command_help import GittyHelp
     from .gitty_command_parent import GittyParent
+    from .gitty_command_plugins import GittyPlugins
     from .gitty_command_release import GittyRelease
     from .gitty_command_show import GittyShowContext
     # from .gitty_command_stabilize import GittyStabilize
@@ -27,6 +28,10 @@ def command_setup(context):
 
     # register the available commands
     context["commands"] = [
+        # load this early, so it can add commands, executors, apis, etc
+    ]
+    context["commands"] += [
+        GittyPlugins(context),
         GittyClean(),
         GittyTask(),
         GittyRelease(),
@@ -39,6 +44,7 @@ def command_setup(context):
     ]
 
     # import these here to avoid circular references
+    # todo: add plugin support here - convert these to plugins?
     from .gitty_project_type_maven import GittyMaven
     from .gitty_project_type_node import GittyNode
     from .gitty_project_type_pip import GittyPip
@@ -46,6 +52,8 @@ def command_setup(context):
     # figure out what kind of project we are using - we'll check in the order these
     # are listed and stop as soon as we find a match - the "unknown" type always
     # matches - so we check it last.
+    # todo: include plugin types here
+
     for project_type in [
         GittyMaven(),
         GittyPip(),
