@@ -21,11 +21,15 @@ class GittyNewPullRequest(GittyCommand):
 	def do_it(self, context):
 
 		cmd_for_remote_url = 'git remote get-url {0}'.format(context['git_remote'])
-		repo_name = GittyCommand.execute_command_safe(context, cmd_for_remote_url.split(' ')).decode('utf-8')
+		# this comes back as "ssh://mwt-git-codecommit/v1/repos/my_url_name", but we just want "my_url_name"
+		repo_url = GittyCommand.execute_command_safe(context, cmd_for_remote_url.split(' ')).decode('utf-8')
+		# we just want the last bit of this, and it ends with a LF, so we strip it
+		repo_name = repo_url.split("/")[-1].strip()
+
 		options = '--targets repositoryName={0},sourceReference={1},destinationReference={2}'.format(
 			repo_name,
 			context['current_branch'],
-			context['parent_version_branch'],
+			context['parent_version_branch']
 		)
 
 		print(
