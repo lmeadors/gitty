@@ -18,6 +18,13 @@ class GittyNewPullRequest(GittyCommand):
 # 	def __init__(self, context):
 # 		print('creating new pr command')
 
+	def get_description(self, context):
+		return [
+			'# create a new pull request (PR) for AWS Code Commit, using the AWS CLI',
+			'# - source branch:     {}'.format(context['current_branch']),
+			'# - destination branch {}'.format(context['parent_version_branch'])
+		]
+
 	def do_it(self, context):
 
 		cmd_for_remote_url = 'git remote get-url {0}'.format(context['git_remote'])
@@ -32,15 +39,17 @@ class GittyNewPullRequest(GittyCommand):
 			context['parent_version_branch']
 		)
 
-		print(
-			'aws codecommit create-pull-request --no-cli-pager --title {0} {1} --query pullRequest.pullRequestId'.format(
-				context['branch_parts'][-1],
-				options
-			)
-		)
+		pr_command = 'aws codecommit create-pull-request --no-cli-pager --title {0} {1} --query pullRequest.pullRequestId'.format(
+			context['branch_parts'][-1], options)
+		print(pr_command)
 
 		# RESPONSE=`eval "${CMD}"`
+		pr_result = GittyCommand.execute_command(context, pr_command.split(' ')).decode('utf-8')
 		# RESPONSE="${RESPONSE%\"}"
 		# RESPONSE="${RESPONSE#\"}"
+		pr_id = pr_result.replace('"', '').strip()
 		# echo "${RESPONSE}"
+		print(
+			'https://console.aws.amazon.com/codesuite/codecommit/repositories/{0}/pull-requests/{1}/details?region=us-east-1'.format(
+				repo_name, pr_id))
 		# echo "https://console.aws.amazon.com/codesuite/codecommit/repositories/${REPO}/pull-requests/${RESPONSE}/details?region=us-east-1"
