@@ -31,6 +31,4 @@ class GittyFinishTask(GittyCommand):
         return description
 
     def do_it(self, context):
-        print('git checkout {0}'.format(context['parent_version_branch']))
-        print('git merge {0}'.format(context['current_branch']));
-        print('git branch -d {0}'.format(context['current_branch']))
+        super().do_it(context)
