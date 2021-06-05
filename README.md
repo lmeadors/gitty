@@ -224,3 +224,9 @@ to indicate that a version is not a release (and partly because of how setuptool
 For this project, non-release builds will not be deployed to pypi - only actual releases will be deployed.
 
 This versioning will start as of version 1.2.0.dev0 (currently master).
+
+# plugins
+
+You can now make plugins for gitty - there are samples in the oh so cleverly named "plugin_samples" directory.
+
+I'll be documenting them more in the future, unless I die or win the lottery or get busy with other things.
