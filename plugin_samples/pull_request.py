@@ -41,7 +41,7 @@ class GittyNewPullRequest(GittyCommand):
 
 		pr_command = 'aws codecommit create-pull-request --no-cli-pager --title {0} {1} --query pullRequest.pullRequestId'.format(
 			context['branch_parts'][-1], options)
-		print(pr_command)
+		# print(pr_command)
 
 		# RESPONSE=`eval "${CMD}"`
 		pr_result = GittyCommand.execute_command(context, pr_command.split(' ')).decode('utf-8')
@@ -49,6 +49,8 @@ class GittyNewPullRequest(GittyCommand):
 		# RESPONSE="${RESPONSE#\"}"
 		pr_id = pr_result.replace('"', '').strip()
 		# echo "${RESPONSE}"
+		print() # a blank line to break this up
+		print("pull request created here:")
 		print(
 			'https://console.aws.amazon.com/codesuite/codecommit/repositories/{0}/pull-requests/{1}/details?region=us-east-1'.format(
 				repo_name, pr_id))
