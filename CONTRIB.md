@@ -52,3 +52,12 @@ To install a specific version:
 
     pip3 install gitty==1.0.3 --no-cache-dir
 
+## problems?
+
+This happened to me once (the fix was easy):
+
+```shell
+-> % python3 -m twine upload dist/*
+/usr/local/opt/python@3.9/bin/python3.9: No module named twine
+-> % pip install twine
+```
