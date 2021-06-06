@@ -366,6 +366,11 @@ class CommentStep(CommandStep):
             '# ' + self.comment % tuple(param_values)
         ]
 
+    def execute(self, context, quiet=True):
+        # do nothing
+        return []
+
+
 
 class GitCommandStep(CommandStep):
     # todo: migrate this to use the new git api in the context
