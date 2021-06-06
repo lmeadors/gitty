@@ -31,4 +31,5 @@ class GittyFinishTask(GittyCommand):
         return description
 
     def do_it(self, context):
-        super().do_it(context)
+        for step in self._steps:
+            step.execute(context)
