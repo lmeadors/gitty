@@ -420,6 +420,88 @@ class GitCheckoutExistingCommand(CommandStep):
         return context['git_api'].checkout_existing(context, context[self.branch_key_name], quiet, None)
 
 
+class GitStatusCheckStep(CommandStep):
+    def describe(self, context):
+        return ['# make sure the git repo has no outstanding changes']
+
+    def execute(self, context, quiet):
+        response = context['git_api'].status_is_clean(context, quiet)
+        # response = GittyCommand.execute_command_safe(context, 'git status -s'.split())
+        if response:
+            # this repo isn't "clean", so don't continue...
+            print(Color.red(response))
+            print(Color.red_lt('aborting cleanup process - repository has outstanding changes'))
+            # set context['continue'] = False if we don't want to continue
+            context['continue'] = False
+
+
+class GitCheckoutMasterCommand(CommandStep):
+
+    def describe(self, context):
+        executor = DescribeExecutor()
+        return context['git_api'].checkout_existing(context, 'master', False, executor)
+
+    def execute(self, context, quiet):
+        return context['git_api'].checkout_existing(context, 'master', quiet, None)
+
+
+class GitShowUnmergedBranchesStep(CommandStep):
+
+    def describe(self, context):
+        return ['git branch --no-color --no-merged']
+
+    def execute(self, context, quiet):
+        print("Unmerged branches")
+        print("-----------------")
+        unmerged_branch_names = context['git_api'].get_unmerged_branch_names(context)
+        print(unmerged_branch_names)
+        # for name in unmerged_branch_names:
+        #     print(name)
+        return []
+
+
+class GitCleanStep(CommandStep):
+
+    def describe(self, context):
+
+        description = [
+            '# remove select LOCAL branches that have been merged to current branch ({})'.format(context['current_branch'])
+        ]
+
+        if 'git_remote' in context:
+            description.append('# (use --remote to also remote REMOTE branches from {})'.format(context['git_remote']))
+
+        return description
+
+    def execute(self, context, quiet):
+        # todo: migrate this to use the new git api in the context: get_merged_branch_names()
+        command_output = GittyCommand.execute_command_safe(context, 'git branch --no-color --merged'.split())
+        output_decoded = command_output.decode('utf-8')
+        output_lines = output_decoded.splitlines()
+        for line in output_lines:
+            branch_name = line.split()[-1]
+
+            retain_reason = ''
+            if branch_name.endswith('/master') or branch_name == 'master':
+                retain_reason = 'master branches are preserved'
+            if branch_name.endswith('/releases'):
+                retain_reason = 'release branches are preserved'
+            if branch_name == context['current_branch']:
+                retain_reason = 'current branch is preserved'
+
+            if not retain_reason:
+                # todo: migrate this to use the new git api in the context: remove_branch()
+                GittyCommand.execute_command(context, 'git branch -d {}'.format(branch_name).split())
+                if 'remote' in context and 'git_remote' in context:
+                    if context['remote']:
+                        GittyCommand.execute_command(
+                            context,
+                            'git push --delete {} {}'.format(context['git_remote'], branch_name).split()
+                        )
+            else:
+                print('leaving branch "{}" ({})'.format(branch_name, retain_reason))
+
+
 class GitCommandBumpNew(CommandStep):
     def __init__(self, version_name):
         self.version_name = version_name
