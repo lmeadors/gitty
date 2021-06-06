@@ -27,10 +27,9 @@ class GittyFinishTask(GittyCommand):
         description = []
         for step in self._steps:
             description += step.describe(context)
-
         return description
 
     def do_it(self, context):
         for step in self._steps:
-            print(step.__class__)
-            step.execute(context)
+            # print(step.__class__)
+            step.execute(context, quiet=False)
