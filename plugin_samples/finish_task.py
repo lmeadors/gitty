@@ -32,4 +32,5 @@ class GittyFinishTask(GittyCommand):
 
     def do_it(self, context):
         for step in self._steps:
+            print(step.__class__)
             step.execute(context)
