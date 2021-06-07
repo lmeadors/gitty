@@ -67,7 +67,7 @@ class GitAPI:
             context,
             'git branch --no-color --no-merged'.split(),
             True
-        )
+        ).split()
         return unmerged_branches
 
     def remove_branch(self, context, branch_name):

@@ -371,7 +371,6 @@ class CommentStep(CommandStep):
         return []
 
 
-
 class GitCommandStep(CommandStep):
     # todo: migrate this to use the new git api in the context
     def __init__(self, cmd_template, context_entry_names):
@@ -454,9 +453,8 @@ class GitShowUnmergedBranchesStep(CommandStep):
         print("Unmerged branches")
         print("-----------------")
         unmerged_branch_names = context['git_api'].get_unmerged_branch_names(context)
-        print(unmerged_branch_names)
-        # for name in unmerged_branch_names:
-        #     print(name)
+        for name in unmerged_branch_names:
+            print(' - {0}'.format(name))
         return []
 
 

@@ -10,6 +10,18 @@ def describe(context):
     return 'merge-check - update a repository and look for unmerged branches'
 
 
+class HubSyncTask(CommandStep):
+    def describe(self, context):
+        return [
+            '$ hub sync'
+        ]
+
+    def execute(self, context, quiet=False):
+        if 'git_remote' in context and context['git_remote'] != '':
+            print('origin: "{0}"'.format(context['git_remote']))
+            GittyCommand.execute_command(context, 'hub sync'.split())
+
+
 class GittyMergeCheckTask(GittyCommand):
     _title = 'update a repository and look for unmerged branches'
     _name = 'merge check'
@@ -17,7 +29,8 @@ class GittyMergeCheckTask(GittyCommand):
     _steps = [
         # CommentStep('merge branch %s', ['current_branch']),
         CommentStep('update all local branches (using hub sync)', []),
-        GitCommandStep('hub sync', []),
+        # GitCommandStep('hub sync', []),
+        HubSyncTask(),
         GitCleanStep(),
         CommentStep('go to master branch', []),
         GitCheckoutMasterCommand(),
