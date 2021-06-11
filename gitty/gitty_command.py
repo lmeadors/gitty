@@ -447,7 +447,7 @@ class GitCheckoutMasterCommand(CommandStep):
 class GitShowUnmergedBranchesStep(CommandStep):
 
     def describe(self, context):
-        return ['git branch --no-color --no-merged']
+        return ['git branch -a --no-color --no-merged']
 
     def execute(self, context, quiet):
         print("Unmerged branches")

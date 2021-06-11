@@ -65,7 +65,7 @@ class GitAPI:
     def get_unmerged_branch_names(self, context):
         unmerged_branches = self.command_executor.execute_immutable_command(
             context,
-            'git branch --no-color --no-merged'.split(),
+            'git branch -a --no-color --no-merged'.split(),
             True
         ).split()
         return unmerged_branches
