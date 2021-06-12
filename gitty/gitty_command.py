@@ -110,6 +110,10 @@ class GittyCommand:
     # these are the steps needed to accomplish this command
     _steps = []
 
+    def bindings_string(self):
+        return " ".join(self._bindings)
+
+
     @staticmethod
     def add_branch_info_to_context(context, current_branch):
 

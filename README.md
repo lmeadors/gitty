@@ -230,3 +230,14 @@ This versioning will start as of version 1.2.0.dev0 (currently master).
 You can now make plugins for gitty - there are samples in the oh so cleverly named "plugin_samples" directory.
 
 I'll be documenting them more in the future, unless I die or win the lottery or get busy with other things.
+
+# tab completion plugin (zsh - experimental)
+
+I'm working on making this easier, but for now, to enable tab completion:
+
+1. install gitty 1.4 or later 
+1. download https://raw.githubusercontent.com/lmeadors/gitty/master/plugin_samples/zsh_complete.py to ~/.gitty/
+2. add this to your .zshrc: `source /usr/local/bin/_gitty_completion.zsh`
+
+This is a new feature with 1.4 - it seems to be working for me, but your mileage may vary - if it's broke, let me know 
+and I'll try to make it better.

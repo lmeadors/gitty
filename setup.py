@@ -19,5 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    scripts=['bin/gitty'],
+    scripts=['bin/gitty', 'bin/_gitty_completion.zsh'],
 )
