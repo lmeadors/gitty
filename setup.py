@@ -24,5 +24,5 @@ setuptools.setup(
         "plugin_samples": ["plugin_samples/*.py"]
     },
     python_requires='>=3.6',
-    scripts=['bin/gitty', 'bin/_gitty_completion.zsh'],
+    scripts=['bin/gitty', 'bin/_gitty_completion.zsh', 'bin/gitty_completion.zsh'],
 )
