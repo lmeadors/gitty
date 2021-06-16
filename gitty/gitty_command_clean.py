@@ -4,7 +4,7 @@ from gitty import GittyCommand, CommentStep, GitCommandStep, CommandStep, Color,
 class GittyClean(GittyCommand):
     _title = 'cleanup'
     _name = 'freshen up around the place - pull changes (with rebase) and cleanup unused branches'
-    _bindings = ['c', 'clean']
+    _bindings = ['clean', 'c']
     _steps = [
         CommentStep('tidy up the local repository - remove obsolete branches', []),
         GitStatusCheckStep(),

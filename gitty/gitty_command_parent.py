@@ -4,7 +4,7 @@ from gitty import GittyCommand, GitCommandStep, CommentStep, GitCheckoutExisting
 class GittyParent(GittyCommand):
     _title = 'parent'
     _name = 'go to parent branch'
-    _bindings = ['p', 'parent']
+    _bindings = ['parent', 'p']
     _steps = [
         CommentStep('go to parent branch (%s)', ['parent_version_branch']),
         GitCheckoutExistingCommand('parent_version_branch')

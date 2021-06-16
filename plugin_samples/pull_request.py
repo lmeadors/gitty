@@ -13,10 +13,7 @@ def describe(context):
 class GittyNewPullRequest(GittyCommand):
 	_title = 'new pull request'
 	_name = 'create a new pull request'
-	_bindings = ['pr']
-
-# 	def __init__(self, context):
-# 		print('creating new pr command')
+	_bindings = ['pull-request', 'pr']
 
 	def get_description(self, context):
 		return [

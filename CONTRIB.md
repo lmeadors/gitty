@@ -10,12 +10,16 @@ a development snapshot from your sources:
 
     git checkout master
     pip3 uninstall gitty
-    pip3 install -e .
+    pip3 install --editable .
    
 This is a "live" version - as you make changes to the project, running it will be reflected immediately.
 
-> NOTE: If you update your python after installing a local version, then remove the old version, things may break - to
-> fix the problem, run `pip3 install -e .` again.
+For more info on this: https://setuptools.readthedocs.io/en/latest/userguide/quickstart.html#development-mode
+
+> NOTE #1: If you update your python after installing a local version, then remove the old version, things may 
+> break - to fix the problem, run `pip3 install --editable .` again.
+
+> NOTE #2: If you modify anything in the `bin` directory, you have to re-run that command, too.
 
 ### building a distribution
 

@@ -5,7 +5,7 @@ class GittyRelease(GittyCommand):
     # todo: migrate this to use the new git api in the context
     _title = 'release'
     _name = 'snap a new release from here'
-    _bindings = ['r', 'release']
+    _bindings = ['release', 'r']
     _steps_from_point = [
 
         CommentStep('{} - {}'.format(_name, 'this is already in a stabilization ecosystem'), []),

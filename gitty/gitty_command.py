@@ -105,13 +105,13 @@ class GittyCommand:
     _name = 'base command that all others extend'
 
     # these are the aliases for this command
-    _bindings = ['b', 'base']
+    _bindings = ['base', 'b']
 
     # these are the steps needed to accomplish this command
     _steps = []
 
     def bindings_string(self):
-        return " ".join(self._bindings)
+        return self._bindings[0]
 
 
     @staticmethod

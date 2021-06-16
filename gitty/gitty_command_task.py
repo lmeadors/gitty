@@ -6,7 +6,7 @@ from gitty import GittyCommand, CommentStep, GitCheckoutNewCommand
 class GittyTask(GittyCommand):
     _title = 'task'
     _name = 'start a new task branch (name is required)'
-    _bindings = ['t', 'task']
+    _bindings = ['task', 't']
     _steps = [
         CommentStep(_name, []),
         CommentStep(
