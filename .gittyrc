@@ -1,0 +1,3 @@
+trunk=master
+task_prefix=tasks
+release_prefix=releases

@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+participant gitty
+participant setup as "setup()\n(gitty_support.py)"
+
+gitty -> setup: init config
+setup -> command_handler: find and execute\ncommand
+command_handler --> setup
+setup --> gitty: exit value
+
+@enduml

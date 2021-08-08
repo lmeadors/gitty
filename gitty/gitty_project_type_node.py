@@ -30,14 +30,14 @@ class GittyNode(GittyProjectType):
             release_version_split = context['release_version'].split(".")
 
             if context['is_stable']:
-                context['current_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
+                context['current_release_branch'] = '.'.join(release_version_split[:-1]) + '/' + context['release_prefix']
                 if context['a_task']:
                     context['new_release_branch'] = None
                     context['new_stabilization_branch'] = None
                     context['new_stabilization_version'] = None
                 else:
-                    context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
-                    context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
+                    context['new_release_branch'] = '.'.join(release_version_split) + '/' + context['release_prefix']
+                    context['new_stabilization_branch'] = '.'.join(release_version_split) + '/' + context['trunk']
                     context['new_stabilization_version'] = '.'.join(release_version_split) + '.0'
             else:
                 context['current_release_branch'] = None
@@ -46,8 +46,8 @@ class GittyNode(GittyProjectType):
                     context['new_stabilization_branch'] = None
                     context['new_stabilization_version'] = None
                 else:
-                    context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
-                    context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/master'
+                    context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/' + context['release_prefix']
+                    context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/' + context['trunk']
                     context['new_stabilization_version'] = '.'.join(release_version_split)
 
             # increment the patch

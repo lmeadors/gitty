@@ -49,19 +49,19 @@ class GittyMaven(GittyProjectType):
             else:
                 if context['is_stable']:
                     # we're already on a stabilization branch, so this includes the full version
-                    context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
-                    context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
+                    context['new_stabilization_branch'] = '.'.join(release_version_split) + '/' + context['trunk']
+                    context['new_release_branch'] = '.'.join(release_version_split) + '/' + context['release_prefix']
                     context['new_stabilization_version'] = '.'.join(release_version_split) + '.0-SNAPSHOT'
                 else:
                     # we're not in a stabilization ecosystem - this will make one...
-                    context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/master'
-                    context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/releases'
+                    context['new_stabilization_branch'] = '.'.join(release_version_split[:-1]) + '/' + context['trunk']
+                    context['new_release_branch'] = '.'.join(release_version_split[:-1]) + '/' + context['release_prefix']
                     context['new_stabilization_version'] = '.'.join(release_version_split) + '-SNAPSHOT'
 
             if context['is_stable']:
                 context['current_release_branch'] = '/'.join([
                     context['branch_parts'][0],
-                    'releases'
+                    context['release_prefix']
                 ])
             else:
                 # we're on THE master branch - so there is not a current release branch
@@ -79,13 +79,13 @@ class GittyMaven(GittyProjectType):
             release_version_split = context['release_version'].split(".")
 
             # we're on an actual release branch, so this includes the full version
-            context['new_release_branch'] = '.'.join(release_version_split) + '/releases'
-            context['new_stabilization_branch'] = '.'.join(release_version_split) + '/master'
+            context['new_release_branch'] = '.'.join(release_version_split) + '/' + context['release_prefix']
+            context['new_stabilization_branch'] = '.'.join(release_version_split) + '/' + context['trunk']
             context['new_stabilization_version'] = '.'.join(release_version_split) + '.0-SNAPSHOT'
 
             context['current_release_branch'] = '/'.join([
                 context['branch_parts'][0],
-                'releases'
+                context['release_prefix']
             ])
 
             self.build_next_version_numbers(context, release_version_split)

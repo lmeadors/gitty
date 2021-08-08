@@ -1,8 +1,45 @@
+import os
+from pathlib import Path
+
 from gitty.gitty_command import *
 import sys
 
 
 def setup(context):
+
+    # look for .gittyrc files - they can live in 2 places:
+    # - the user's home directory
+    # - the current working directory (CWD)
+    # if both exist and define overlapping values, the one in the CWD is used
+    # these are the global defaults
+    grc_config = {
+        'trunk': 'master',
+        'task_prefix': 'tasks',
+        'release_prefix': 'releases'
+    }
+    home_config_location = os.path.join(Path.home(), ".gittyrc")
+    local_config_location = ".gittyrc"
+    if os.path.exists(home_config_location):
+        with open(home_config_location) as f:
+            for line in f:
+                (key, val) = line.split("=")
+                grc_config[key] = val.strip()
+
+    if os.path.exists(local_config_location):
+        with open(local_config_location) as f:
+            for line in f:
+                (key, val) = line.split("=")
+                grc_config[key] = val.strip()
+
+    # if len(grc_config) == 0:
+    #     print(
+    #         "no config files found at '{}' or '{}', using defaults.".format(
+    #             home_config_location, local_config_location
+    #         )
+    #     )
+
+    context.update(grc_config)
+    # print(context)
 
     # get any CLI switches in the context:
     # look at any parameter that starts with '--', and if the NEXT parameter doesn't

@@ -117,6 +117,7 @@ class GittyCommand:
     @staticmethod
     def add_branch_info_to_context(context, current_branch):
 
+
         # what is the commit hash
         if 'git_ref' not in context:
             # by default, use the current HEAD
@@ -134,18 +135,18 @@ class GittyCommand:
         branch_parts = current_branch.split("/")
 
         # are we on THE master branch or any other master branch?
-        the_master = current_branch == 'master'
-        a_master = branch_parts[-1] == 'master'
+        the_master = current_branch == context['trunk']
+        a_master = branch_parts[-1] == context['trunk']
 
         # are we on a task branch?
-        a_task = 'tasks' in branch_parts
-        a_release = 'releases' in branch_parts
+        a_task = context['task_prefix'] in branch_parts
+        a_release = context['release_prefix'] in branch_parts
 
         if not a_task and not a_release:
             if the_master:
-                task_prefix = 'tasks/'
+                task_prefix = context['task_prefix'] + '/'
             else:
-                task_prefix = branch_parts[0] + '/tasks/'
+                task_prefix = branch_parts[0] + '/' + context['task_prefix'] + '/'
         else:
             # we're on a task or release branch - we don't create task branches from those
             task_prefix = None
@@ -333,16 +334,16 @@ class GittyCommand:
         if context['is_stable']:
             if context['a_task'] or context['a_release']:
                 # we're on a task or release branch - the parent is different...
-                context['parent_version_branch'] = context['branch_parts'][0] + '/master'
+                context['parent_version_branch'] = context['branch_parts'][0] + '/' + context['trunk']
             else:
                 if len(context['current_version_parts']) <= 4:
                     # parent is just master
-                    context['parent_version_branch'] = 'master'
+                    context['parent_version_branch'] = context['trunk']
                 else:
                     # parent is a shortened version
-                    context['parent_version_branch'] = '.'.join(context['current_version_parts'][:-2]) + '/master'
+                    context['parent_version_branch'] = '.'.join(context['current_version_parts'][:-2]) + '/' + context['trunk']
         else:
-            context['parent_version_branch'] = 'master'
+            context['parent_version_branch'] = context['trunk']
 
         return context
 
@@ -442,10 +443,10 @@ class GitCheckoutMasterCommand(CommandStep):
 
     def describe(self, context):
         executor = DescribeExecutor()
-        return context['git_api'].checkout_existing(context, 'master', False, executor)
+        return context['git_api'].checkout_existing(context, context['trunk'], False, executor)
 
     def execute(self, context, quiet):
-        return context['git_api'].checkout_existing(context, 'master', quiet, None)
+        return context['git_api'].checkout_existing(context, context['trunk'], quiet, None)
 
 
 class GitShowUnmergedBranchesStep(CommandStep):
@@ -484,9 +485,9 @@ class GitCleanStep(CommandStep):
             branch_name = line.split()[-1]
 
             retain_reason = ''
-            if branch_name.endswith('/master') or branch_name == 'master':
-                retain_reason = 'master branches are preserved'
-            if branch_name.endswith('/releases'):
+            if branch_name.endswith('/'+context['trunk']) or branch_name == context['trunk']:
+                retain_reason = context['trunk'] + ' branches are preserved'
+            if branch_name.endswith('/' + context['release_prefix']):
                 retain_reason = 'release branches are preserved'
             if branch_name == context['current_branch']:
                 retain_reason = 'current branch is preserved'

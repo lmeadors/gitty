@@ -38,13 +38,13 @@ class GittyPip(GittyProjectType):
         stable_branch_version = '.'.join(current_version_split[:-2])
         if context['is_stable']:
             # this means we're NOT on THE master branch or a task branch
-            context['new_stabilization_branch'] = release_version + '/master'
-            context['new_release_branch'] = release_version + '/releases'
+            context['new_stabilization_branch'] = release_version + '/' + context['trunk']
+            context['new_release_branch'] = release_version + '/' + context['release_prefix']
             context['new_stabilization_version'] = release_version + '.0.dev0'
         else:
             # this means we're on a branch like 1.0/master
-            context['new_stabilization_branch'] = stable_branch_version + '/master'
-            context['new_release_branch'] = stable_branch_version + '/releases'
+            context['new_stabilization_branch'] = stable_branch_version + '/' + context['trunk']
+            context['new_release_branch'] = stable_branch_version + '/' + context['release_prefix']
             context['release_version'] = stable_branch_version + '.0'
 
             if context['the_master']:
@@ -67,7 +67,7 @@ class GittyPip(GittyProjectType):
         context['next_stable_version'] = next_stable_version + '.dev0'
 
         if len(context['branch_parts']) > 1:
-            context['current_release_branch'] = stable_branch_version + '/releases'
+            context['current_release_branch'] = stable_branch_version + '/' + context['release_prefix']
         else:
             context['current_release_branch'] = None
 
