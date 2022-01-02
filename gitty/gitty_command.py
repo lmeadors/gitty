@@ -48,6 +48,8 @@ def command_setup(context):
     from .gitty_project_type_maven import GittyMaven
     from .gitty_project_type_node import GittyNode
     from .gitty_project_type_pip import GittyPip
+    from .gitty_project_type_gradle_kotlin import GittyGradleKotlin
+    from .gitty_project_type_xcode import GittyXCode
 
     # figure out what kind of project we are using - we'll check in the order these
     # are listed and stop as soon as we find a match - the "unknown" type always
@@ -58,6 +60,8 @@ def command_setup(context):
         GittyMaven(),
         GittyPip(),
         GittyNode(),
+        GittyXCode(),
+        GittyGradleKotlin(),
         GittyUnknownProjectType()
     ]:
         if project_type.is_in_use(context):
