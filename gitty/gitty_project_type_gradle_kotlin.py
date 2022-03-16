@@ -14,6 +14,7 @@ class GittyGradleKotlin(GittyProjectType):
         if is_gradle:
             context['project_type_name'] = self.get_name()
             context['project_file'] = 'settings.gradle.kts'
+        # print("**** GRADLE ****")
         return is_gradle
 
     def get_version_info(self, context):
@@ -27,16 +28,19 @@ class GittyGradleKotlin(GittyProjectType):
                 line = line.strip()
                 if line.strip().startswith('include'):
                     include_line = line
-        app_path = ''
+                    app_path = include_line.split('"')[1]
+                elif line.strip().startswith('rootProject.name'):
+                    include_line = line
+                    app_path = '.'
+
         # TODO: this will need some attention for multi-build projects; we
         #  will want to make it possible to deal with more than one build
         #  file - that will be a nice feature - i think we just want a list
         #  of project files and would only support keeping the version
         #  numbers in lockstep (initially, at least). (I suspect xcode
         #  support would benefit from this as well).
-        if len(include_line) > 0:
-            # print('include line: {}'.format(include_line))
-            app_path = include_line.split('"')[1]
+        # print('app path is: {}'.format(app_path))
+
         if len(app_path) > 0:
             # now we have our actual config file and can
             # start setting things up...

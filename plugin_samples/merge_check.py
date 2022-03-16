@@ -32,7 +32,7 @@ class GittyMergeCheckTask(GittyCommand):
         # GitCommandStep('hub sync', []),
         HubSyncTask(),
         GitCleanStep(),
-        CommentStep('go to master branch', []),
+        CommentStep('go to main trunk branch (%s)', ['trunk']),
         GitCheckoutMasterCommand(),
         GitCleanStep(),
         GitShowUnmergedBranchesStep(),

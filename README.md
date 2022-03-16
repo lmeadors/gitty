@@ -1,22 +1,28 @@
 # gitty - a simple alternative to git flow with less rigidity
 
-
 This project provides an easy way to deal with git branches in an environment with multiple parallel development streams.
 
 View download stats here: https://pypistats.org/packages/gitty
 
 <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/gitty">
 
-### Some assumptions:
-
-- the `master` branch is the cutting edge of new development
-- release stabilization branches are created for each major and minor release
-- semantic versioning will be used to track where we are
-- projects are using either maven, python, or nodejs 
+> It is worth noting that (like git flow), this is a tool to simplify the implementation of a workflow - you can do 
+> everything manually if you want to, so don't get too hung up on the tooling.
 
 # Some sample work flows...
 
 To get started, we'll make a new empty project using node. 
+
+### But first, some assumptions!
+
+- the `master` branch is the cutting edge of new development (we will see how to change that later)
+- release stabilization branches are created for each major and minor release
+- semantic versioning will be used to track where we are
+- projects are using a supported project type:
+  - maven - solid support
+  - python - I use it for this project, so it is probably adequate
+  - nodejs - experimental - try it and let me know
+  - gradle - expreimental - I am using it, but still with dev builds
 
 Next, we'll walk through some common scenarios and see how to use this thing.
 
@@ -43,19 +49,11 @@ $ git rev-parse --abbrev-ref HEAD
 current branch:  master
 project type:    node
 current version: 1.0.0
-command name:    help
-available commands on branch "master" are:
-
-cleanup: ['c', 'clean']
-  # tidy up the local repository - remove obsolete branches
-  # make sure the git repo has no outstanding changes
-  $ git fetch --all --prune
-  $ git pull --rebase
-  # remove select local branches that have been merged to master
-...and a LOT more output here...
+command name:              head
+for help, try "gitty help"
 ```
 
-This is telling you what gitty thinks the state of your project is, and what you can do.
+This is telling you what gitty thinks the state of your project is, if you want more information, try `gitty help`.
 
 # new release stabilization branch
 
@@ -231,7 +229,7 @@ You can now make plugins for gitty - there are samples in the oh so cleverly nam
 
 I'll be documenting them more in the future, unless I die or win the lottery or get busy with other things.
 
-# tab completion plugin (zsh - experimental)
+# EXPERIMENTAL: tab completion plugin (zsh)
 
 I'm working on making this easier, but for now, to enable tab completion:
 
@@ -241,3 +239,39 @@ I'm working on making this easier, but for now, to enable tab completion:
 
 This is a new feature starting with the 1.4 release. It seems to be working for me, but your mileage may vary - if 
 it's broken, let me know, and I'll try to make it better.
+
+> UPDATE: I have been using this for a efw months - it seems to work fine.
+
+# EXPERIMENTAL: How can I use different branch names? I do not have a "master" branch...
+
+I have a few projects like this, too - 
+
+This should work, but I may have missed a few spots.
+ 
+Create a file named `.gittyrc` in your project directory (or your home directory if you want this to be a global 
+default) - you can override some settings with it. For example, if you just want to call your `master` 
+branch `main` instead:
+
+```
+trunk=main
+```
+
+Your working (trunk) branch(es) would be named "main"; tasks would be named "tasks/...", and releases would live 
+on "release" branches.
+
+If you really miss git flow, you can even do this:
+
+```
+trunk=develop
+tasks=features
+release=master
+```
+
+This will give you a hybrid of gitflow and gitty:
+
+- your "working branches" will be either `develop` or `x.y/develop`
+- releases will live on `x.y/master`
+- task branches will live on either `features/...` or `x.y/features/...`
+
+Because the gitty process has no concept of a "hotfix" (every release can be a hotfix; every version can be patched), 
+there is no need for those extra branch names.
