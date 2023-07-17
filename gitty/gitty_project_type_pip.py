@@ -10,10 +10,12 @@ class GittyPip(GittyProjectType):
         return 'pip'
 
     def is_in_use(self, context):
-        is_pip = path.exists('setup.py')
+        git_api = context['git_api']
+        project_file = '/'.join([(git_api.get_root_path(context)), 'setup.py'])
+        is_pip = path.exists(project_file)
         if is_pip:
             context['project_type_name'] = self.get_name()
-            context['project_file'] = 'setup.py'
+            context['project_file'] = project_file
         return is_pip
 
     def get_version_info(self, context):

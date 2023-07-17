@@ -4,6 +4,8 @@ from pathlib import Path
 from gitty.gitty_command import *
 import sys
 
+from gitty.gitty_git_api import GitAPI
+
 
 def setup(context):
 
@@ -12,13 +14,17 @@ def setup(context):
     # - the current working directory (CWD)
     # if both exist and define overlapping values, the one in the CWD is used
     # these are the global defaults
+    if 'git_api' not in context:
+        context['executor'] = CommandExecutor()
+        context['git_api'] = GitAPI(context["executor"])
     grc_config = {
         'trunk': 'master',
         'task_prefix': 'tasks',
         'release_prefix': 'releases'
     }
     home_config_location = os.path.join(Path.home(), ".gittyrc")
-    local_config_location = ".gittyrc"
+    git_api = context['git_api']
+    local_config_location = '/'.join([(git_api.get_root_path(context)), ".gittyrc"])
     if os.path.exists(home_config_location):
         with open(home_config_location) as f:
             for line in f:

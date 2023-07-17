@@ -18,6 +18,14 @@ class GitAPI:
         )
         return current_branch
 
+    def get_root_path(self, context):
+        # git rev-parse --show-toplevel
+        return self.command_executor.execute_immutable_command(
+            context,
+            'git rev-parse --show-toplevel'.split(),
+            quiet=True
+        )
+
     def git_remote(self, context, quiet=False):
         return self.command_executor.execute_immutable_command(
             context,
