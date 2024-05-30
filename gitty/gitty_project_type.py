@@ -1,7 +1,7 @@
 from xml.etree import ElementTree
 # noinspection PyUnresolvedReferences
 # this is so distutils doesn't complain about being imported before setuptools...apparently that's frowned upon.
-import setuptools
+# import setuptools
 
 
 class GittyProjectType:

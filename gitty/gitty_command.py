@@ -1,4 +1,5 @@
 import pkg_resources  # part of setuptools
+# import importlib.metadata
 import subprocess
 from .gitty_color import Color
 from .gitty_executor import DescribeExecutor, CommandExecutor
@@ -98,6 +99,7 @@ def command_setup(context):
 
     # add the current gitty version to the context
     context['gitty_version'] = pkg_resources.require("gitty")[0].version
+    # context['gitty_version'] = importlib.metadata.version("gitty")
 
 
 class GittyCommand:
